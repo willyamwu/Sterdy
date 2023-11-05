@@ -1,0 +1,4 @@
+.env
+client_secret.json
+sterdy-permissions.json
+token.json
