@@ -9,23 +9,42 @@ import CONSTANTS
 from nba_api.stats.endpoints import LeagueGameFinder
 from dotenv import load_dotenv
 from nba_api.stats.static import players, teams
-from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, PlayerGameLog, CommonPlayerInfo, BoxScoreSummaryV2, BoxScoreDefensiveV2, LeagueLeaders, PlayByPlayV3
+from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, PlayerGameLog, CommonPlayerInfo, BoxScoreSummaryV2, BoxScoreDefensiveV2, LeagueLeaders, PlayByPlayV3, BoxScoreAdvancedV3, WinProbabilityPBP
 from datetime import datetime, timedelta
 
 
-game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string, 
-                                       date_to_nullable=CONSTANTS.yesterday_date_string, 
-                                       league_id_nullable='00').get_data_frames()[0]
-
-# print(game_finder)
-
-unique_game_ids = game_finder['GAME_ID'].unique()
+my_string = "This is a string with spaces"
+my_string_without_spaces = my_string.replace(' ', '')
+print(my_string_without_spaces)
 
 
-game_id = unique_game_ids[0]
+# game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string, 
+#                                        date_to_nullable=CONSTANTS.yesterday_date_string, 
+#                                        league_id_nullable='00').get_data_frames()[0]
 
-play = PlayByPlayV3(end_period=0, game_id='0022300104', start_period=0).get_data_frames()["AvailableVideo"]
-print(play)
+# # print(game_finder)
+
+# unique_game_ids = game_finder['GAME_ID'].unique()
+
+
+# game_id = unique_game_ids[0]
+
+# # play = PlayByPlayV3(end_period=0, game_id='0022300104', start_period=0).get_data_frames()[0]
+# # print(play)
+
+# # play = BoxScoreAdvancedV3(end_period=0, game_id='0022300104', start_period=0).get_data_frames()[0]
+
+# # for i in range(len(play)):
+# #     print(play.iloc[i])
+
+# play = WinProbabilityPBP(game_id='0022300138').get_data_frames()[0]
+
+# for i in range(len(play)):
+#     p = play.iloc[i]
+#     if p['DESCRIPTION'] and p['HOME_PCT']:
+#         print(p)
+
+
 # print(game_id)
 # player_id = '1629684'  # Replace with the player's ID you're interested in
 

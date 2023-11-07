@@ -52,23 +52,29 @@ dir(drive_service)
 
 def create_request(master_dict, game_ids, game_dict):
     key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
+    team_key_array = ['TEAM', 'W-L', 'PTS', 'RATING', 'FG', 'SH', 'AST', 'REB', 'BLK', 'STL', 'TOV']
 
     for game in game_ids:
         game_c = 1
         count = 1
+        team_count = 1
+        
         PRESENTATION_COPY_ID = create_slide()
 
         edit_top_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, game=master_dict[game])
+
+        # for team in master_dict[game]['TEAM']:
+        #     print(team)
+        #     for i in range(len(team_key_array)):
+        #         get_team_keys(key=team_key_array[i], value=team, i=team_count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+        #         time.sleep(1)
+        #     team_count+=1
+
         for players in master_dict[game]['PLAYERS']:
                 print(players)
-                if count <= 10:
-                    for i in range(7):
-                        get_special_keys(key=key_array[i], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
-                        time.sleep(1)
-                else:
-                    print("hi")
-                    break
-                count += 1
+                for i in range(7):
+                    get_special_keys(key=key_array[i], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+                    time.sleep(1)
 
         get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
         delete_slide(PRESENTATION_COPY_ID)
@@ -100,19 +106,47 @@ def get_special_keys(key, value, i, PRESENTATION_COPY_ID):
     else:
        return
 
-    request = [
-        {
-            'replaceAllText': {
-                'containsText': {
-                    'text': replacement_key,
-                    'matchCase': False
-                },
-                'replaceText': str(value)
-            }
-        }
-    ]
+    # request = [
+    #     {
+    #         'replaceAllText': {
+    #             'containsText': {
+    #                 'text': replacement_key,
+    #                 'matchCase': False
+    #             },
+    #             'replaceText': str(value)
+    #         }
+    #     }
+    # ]
 
-    edit_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, requests=request)
+    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
+
+
+def get_team_keys(key, value, i, PRESENTATION_COPY_ID):
+    if key == 'TEAM':
+        replacement_key = '{' + key + str(i) + '}'
+        value = value.data['firstName'] + " " + value.data['familyName']
+    elif key == 'W-L':
+        replacement_key = '{' + 'RT' + str(i) + '}'
+        value = value.rating
+    elif key == 'PTS':
+        replacement_key = '{' + 'P' + str(i) + '}'
+        value = value.data['points']
+    elif key == 'REB':
+        replacement_key = '{' + 'RB' + str(i) + '}'
+        value = value.data['reboundsTotal']
+    elif key == 'AST':
+        replacement_key = '{' + 'A' + str(i) + '}'
+        value = value.data['assists']
+    elif key == 'DEF':
+        replacement_key = '{' + 'D' + str(i) + '}'
+        value = value.data['steals'] + value.data['blocks'] 
+    elif key == 'TEAM':
+        replacement_key = '{' + 'T' + str(i) + '}'
+        value = value.data['teamTricode']
+    else:
+       return
+
+    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
 
 
 def get_slide_id(id):
@@ -146,39 +180,51 @@ def create_slide():
     return PRESENTATION_COPY_ID
 
 
-def edit_slide(PRESENTATION_COPY_ID, requests):
+def edit_text_slide(PRESENTATION_COPY_ID, replacement_key, replacement_text):
+    request = [
+        {
+            'replaceAllText': {
+                'containsText': {
+                    'text': replacement_key,
+                    'matchCase': False
+                },
+                'replaceText': replacement_text
+            }
+        }
+    ]
+
     response = slides_service.presentations().batchUpdate(
-        presentationId=PRESENTATION_COPY_ID, body={'requests': requests}).execute()
+        presentationId=PRESENTATION_COPY_ID, body={'requests': request}).execute()
 
 
 def edit_top_slide(PRESENTATION_COPY_ID, game):
-    requests = [
-        {
-            'replaceAllText': {
-                'containsText': {
-                    'text': '{{MATCH}}',
-                    'matchCase': False
-                },
-                'replaceText': game['SLIDE_MATCHUP']
-            }
-        }
-    ]
+    # requests = [
+    #     {
+    #         'replaceAllText': {
+    #             'containsText': {
+    #                 'text': '{{MATCH}}',
+    #                 'matchCase': False
+    #             },
+    #             'replaceText': game['SLIDE_MATCHUP']
+    #         }
+    #     }
+    # ]
 
-    edit_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, requests=requests)
+    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{{MATCH}}', replacement_text=game['SLIDE_MATCHUP'])
 
-    requests = [
-        {
-            'replaceAllText': {
-                'containsText': {
-                    'text': '{DATE}',
-                    'matchCase': False
-                },
-                'replaceText': CONSTANTS.yesterday_date_string
-            }
-        }
-    ]
+    # requests = [
+    #     {
+    #         'replaceAllText': {
+    #             'containsText': {
+    #                 'text': '{DATE}',
+    #                 'matchCase': False
+    #             },
+    #             'replaceText': CONSTANTS.yesterday_date_string
+    #         }
+    #     }
+    # ]
 
-    edit_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, requests=requests)
+    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{DATE}', replacement_text=CONSTANTS.yesterday_date_string)
 
 
 def get_images(PRESENTATION_COPY_ID):

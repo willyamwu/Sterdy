@@ -3,6 +3,7 @@ class NBA_Team:
     def __init__(self, data):
         self.data = data
         self.team_id = data['teamId']
+        self.team_name = data['teamName']
         self.team_city = data['teamCity']
         self.team_tricode = data['teamTricode']
         self.team_slug = data['teamSlug']

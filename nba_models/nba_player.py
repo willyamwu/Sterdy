@@ -2,6 +2,7 @@ class NBA_Player:
     def __init__(self, row) -> None:
         self.data = row
         self.full_name = row["firstName"] + " " + row["familyName"]
+        self.last_name = row["familyName"]
         self.person_id = row['personId']
         self.team_tricode = row['teamTricode']
         self.calculate_rating()

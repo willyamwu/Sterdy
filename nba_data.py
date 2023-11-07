@@ -19,7 +19,7 @@ def get_games():
     try:
         game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string, 
                                        date_to_nullable=CONSTANTS.yesterday_date_string, 
-                                       league_id_nullable='00').get_data_frames()[0]  # Find games happening on a certain day.
+                                       league_id_nullable='00').get_data_frames()[0]
         if game_finder.empty:
             print("No games going on today :(")
             return
@@ -58,7 +58,7 @@ def get_games():
             team = NBA_Team(team_boxscore.iloc[i])
             team_data.append(team)
 
-        player_data = sort_players_by_rating(player_data)
+        player_data = sort_players_by_rating(player_data)[:10]
         master_dict[game]['PLAYERS'] = player_data
         master_dict[game]['TEAMS'] = team_data
         # print("team data:",team_data[0].team_slug,team_data[0].rating, " dkemdkem ", team_data[1].team_city,team_data[1].rating)
@@ -87,6 +87,11 @@ def get_matchup(game_finder, unique_games):
 
 
 def build_text(game_id):
+    team1 = master_dict[game_id]['TEAMS'][0]
+    team2 = master_dict[game_id]['TEAMS'][1]
+    players = master_dict[game_id]['PLAYERS']
+
+    # Building the tweet text
     twitter_matchup_text = "\U0001F6A8 #NBA Report for " + CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
 
     for item in master_dict[game_id]['SCORE']:
@@ -94,11 +99,21 @@ def build_text(game_id):
             twitter_matchup_text = twitter_matchup_text + key + ": " + value + "\n"
 
     # matchup_text = matchup_text + master_dict[game_id]['TWITTER_MATCHUP'] + "\n"
-    twitter_matchup_text += master_dict[game_id]['PLAYERS'][0].player_of_the_match() + "\nOur Top 10 ⬇️"
-    
-    print(twitter_matchup_text)
+    twitter_matchup_text += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
+
+    instagram_caption = twitter_matchup_text
+
+    twitter_matchup_text += "\nOur Top 10 ⬇️"
     
     master_dict[game_id]['TWITTER_MATCHUP'] = twitter_matchup_text
+
+    instagram_caption += "\n\n\n\n\n" + CONSTANTS.instagram_hashtags
+    instagram_caption += f"#{team1.team_name.replace(' ', '')} #{team2.team_name.replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
+
+    for i in range(10):
+        instagram_caption += f"#{players[i].full_name.replace(' ', '').replace('.', '').replace('-', '')} #{players[i].last_name.replace(' ', '').replace('.', '').replace('-', '')} "
+    
+    print(instagram_caption)
 
     count  = 0
     slide_matchup_text = ""

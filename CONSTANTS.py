@@ -24,10 +24,8 @@ GOOGLE_CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 # business_id = "123612720831100"
 # insta_business_id = "111274578741163"
 
-start_up_prompt = '''Command Options:
-(1) Daily Game Analysis
-(2) Player Rankings 
-(3) Team Rankings'''
+# Instagram Hashtags
+instagram_hashtags = "#basketball #bball #ball "
 
 # Twitter Authentication
 auth = tweepy.OAuthHandler(TWITTER_API_KEY, TWITTER_API_KEY_SECRET)
