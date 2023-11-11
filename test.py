@@ -10,13 +10,87 @@ from nba_api.stats.endpoints import LeagueGameFinder
 from dotenv import load_dotenv
 from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, PlayerGameLog, CommonPlayerInfo, BoxScoreSummaryV2, BoxScoreDefensiveV2, LeagueLeaders, PlayByPlayV3, BoxScoreAdvancedV3, WinProbabilityPBP
+from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
 
 
-my_string = "This is a string with spaces"
-my_string_without_spaces = my_string.replace(' ', '')
-print(my_string_without_spaces)
+# my_string = "This is a string with spaces"
+# my_string_without_spaces = my_string.replace(' ', '')
+# print(my_string_without_spaces)
 
+
+
+# # Specify the season and the team's ID (e.g., the ID for the Los Angeles Lakers is 1610612747)
+# season = '23-24'  # Replace this with the desired season
+# team_id = 1610612739  # Replace this with the desired team's ID
+
+# # Retrieve the team dashboard by general splits
+# team_info = TeamDashboardByGeneralSplits(team_id=team_id)
+# team_info_df = team_info.get_data_frames()[0]
+# print(team_info_df)
+
+# # Extract the win-loss record
+# wins = team_info_df['W']
+# losses = team_info_df['L']
+
+# # Print the win-loss record
+# print(f"Team {team_id} has {wins.iloc[0]} wins and {losses.iloc[0]} losses in the {season} season.")
+
+# from nba_api.stats.endpoints import teamyearbyyearstats
+
+# # Specify the team's ID (e.g., the ID for the Los Angeles Lakers is 1610612747)
+# team_id = 1610612739  # Replace this with the desired team's ID
+
+# # Retrieve the team's year-by-year statistics
+# team_stats = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id)
+# team_stats_df = team_stats.get_data_frames()[0].iloc[-1]
+
+# # Display the team's statistics for the entire current season
+# print(team_stats_df["WINS"])
+
+
+from tqdm import tqdm
+import time
+
+# Your iterable (e.g., range, list, etc.)
+iterable = range(100)
+
+GREEN = "\033[92m"
+
+RESET_COLOR = "\033[0m"
+
+# Wrap the iterable with tqdm
+for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc="Processing items", unit="item", total=len(iterable), leave=True):
+    # Your processing logic here
+    time.sleep(0.1)  # Simulating some work
+
+
+
+# from nba_api.stats.endpoints import playerdashboardbylastngames
+
+# # Define the parameters
+# player_id = 201939  # Example player ID for Stephen Curry
+# last_n_games = 10  # Number of games to consider
+
+# # Retrieve the player's dashboard by the last 'n' games
+# player_info = playerdashboardbylastngames.PlayerDashboardByLastNGames(player_id=player_id, last_n_games=last_n_games)
+# player_info_df = player_info.get_data_frames()[0]
+
+# # Display the player rankings based on the last 'n' games
+# print(player_info_df)
+
+
+# from nba_api.stats.endpoints import playerdashboardbyyearoveryear
+
+# # Specify the player's ID (e.g., the ID for Stephen Curry is 201939)
+# player_id = 201939  # Replace this with the desired player's ID
+
+# # Retrieve the player's statistics for the entire current season
+# player_stats = playerdashboardbyyearoveryear.PlayerDashboardByYearOverYear(player_id=player_id)
+# player_stats_df = player_stats.get_data_frames()[1]
+
+# # Display the player's statistics for the entire current season
+# print("p", player_stats_df)
 
 # game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string, 
 #                                        date_to_nullable=CONSTANTS.yesterday_date_string, 

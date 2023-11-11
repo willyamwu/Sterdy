@@ -14,6 +14,7 @@ import CONSTANTS
 from PIL import Image
 from io import BytesIO
 import time
+from tqdm import tqdm
 
 CLIENT_FILE = 'client_secret.json'
 CLIENT_ID = CONSTANTS.GOOGLE_CLIENT_ID
@@ -50,18 +51,30 @@ dir(slides_service)
 drive_service = build('drive', 'v3', credentials=creds)
 dir(drive_service)
 
+total_tasks = 94
+
 def create_request(master_dict, game_ids, game_dict):
     key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
     team_key_array = ['TEAM', 'W-L', 'PTS', 'RATING', 'FG', 'SH', 'AST', 'REB', 'BLK', 'STL', 'TOV']
 
+    game_count = 1
+    total_games = len(game_ids)
+
     for game in game_ids:
-        game_c = 1
+        game_number = f"Game {str(game_count)}/{total_games}:"
+        progress_bar = tqdm(total=total_tasks, desc=game_number, unit="task")
         count = 1
         team_count = 1
         
+        progress_bar.set_description(game_number + "Creating a Copy of the Slide")
         PRESENTATION_COPY_ID = create_slide()
+        progress_bar.update(1)
 
+        progress_bar.set_description(game_number + "Date and Matchup text")
         edit_top_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, game=master_dict[game])
+        progress_bar.update(1)
+
+        get_team_keys(value=master_dict[game]["TEAMS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
 
         # for team in master_dict[game]['TEAM']:
         #     print(team)
@@ -71,13 +84,23 @@ def create_request(master_dict, game_ids, game_dict):
         #     team_count+=1
 
         for players in master_dict[game]['PLAYERS']:
-                print(players)
-                for i in range(7):
-                    get_special_keys(key=key_array[i], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+                # print(players.full_name)
+                for j in range(7):
+                    get_special_keys(key=key_array[j], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
                     time.sleep(1)
+                count += 1
 
+        progress_bar.set_description(game_number + "Downloading Images")
         get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+        progress_bar.update(1)
+
+        progress_bar.set_description(game_number + "Deleting Slides")
         delete_slide(PRESENTATION_COPY_ID)
+        progress_bar.update(1)
+
+        game_count += 1
+        progress_bar.close()
+
     print(requests)
 
 
@@ -106,47 +129,20 @@ def get_special_keys(key, value, i, PRESENTATION_COPY_ID):
     else:
        return
 
-    # request = [
-    #     {
-    #         'replaceAllText': {
-    #             'containsText': {
-    #                 'text': replacement_key,
-    #                 'matchCase': False
-    #             },
-    #             'replaceText': str(value)
-    #         }
-    #     }
-    # ]
-
     edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
 
 
-def get_team_keys(key, value, i, PRESENTATION_COPY_ID):
-    if key == 'TEAM':
-        replacement_key = '{' + key + str(i) + '}'
-        value = value.data['firstName'] + " " + value.data['familyName']
-    elif key == 'W-L':
-        replacement_key = '{' + 'RT' + str(i) + '}'
-        value = value.rating
-    elif key == 'PTS':
-        replacement_key = '{' + 'P' + str(i) + '}'
-        value = value.data['points']
-    elif key == 'REB':
-        replacement_key = '{' + 'RB' + str(i) + '}'
-        value = value.data['reboundsTotal']
-    elif key == 'AST':
-        replacement_key = '{' + 'A' + str(i) + '}'
-        value = value.data['assists']
-    elif key == 'DEF':
-        replacement_key = '{' + 'D' + str(i) + '}'
-        value = value.data['steals'] + value.data['blocks'] 
-    elif key == 'TEAM':
-        replacement_key = '{' + 'T' + str(i) + '}'
-        value = value.data['teamTricode']
-    else:
-       return
+def get_team_keys(value, PRESENTATION_COPY_ID):
+    # team_keys = {'TEAM', 'W-L', 'PTS', 'RATING', 'FG', 'SH', 'AST', 'REB', 'BLK', 'STL', 'TOV'}
+    team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT', '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
 
-    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
+    for i in range(2):
+        for j in range(len(team_key_array)):
+            replacement_key = team_key_array[j] + str(i+1) + '}'
+            replacement_text = value[i].team_stats_array[j]
+            # print(value[i].team_stats_array[j])
+            edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
+            time.sleep(1)
 
 
 def get_slide_id(id):

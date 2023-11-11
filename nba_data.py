@@ -45,7 +45,6 @@ def get_games():
 
         player_boxscore = BoxScoreTraditionalV3(game_id=game).get_data_frames()[0]
         team_boxscore = BoxScoreTraditionalV3(game_id=game).get_data_frames()[2]
-        print(team_boxscore)
 
         for index, row in player_boxscore.iterrows():
             if (row['minutes']):
@@ -61,9 +60,10 @@ def get_games():
         player_data = sort_players_by_rating(player_data)[:10]
         master_dict[game]['PLAYERS'] = player_data
         master_dict[game]['TEAMS'] = team_data
+        # print(master_dict[game]['TEAMS'][0].team_stats_array)
         # print("team data:",team_data[0].team_slug,team_data[0].rating, " dkemdkem ", team_data[1].team_city,team_data[1].rating)
         build_text(game)
-        print("-------------")
+        print("----------------------------------------------")
 
 
 def sort_players_by_rating(player_data):
@@ -92,27 +92,29 @@ def build_text(game_id):
     players = master_dict[game_id]['PLAYERS']
 
     # Building the tweet text
-    twitter_matchup_text = "\U0001F6A8 #NBA Report for " + CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
+    tweet_text = "\U0001F6A8 #NBA Report for " + CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
 
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
-            twitter_matchup_text = twitter_matchup_text + key + ": " + value + "\n"
+            tweet_text = tweet_text + key + ": " + value + "\n"
 
-    # matchup_text = matchup_text + master_dict[game_id]['TWITTER_MATCHUP'] + "\n"
-    twitter_matchup_text += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
+    tweet_text += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
 
-    instagram_caption = twitter_matchup_text
+    instagram_caption = tweet_text
 
-    twitter_matchup_text += "\nOur Top 10 ⬇️"
+    tweet_text += "\nOur Top 10 ⬇️"
     
-    master_dict[game_id]['TWITTER_MATCHUP'] = twitter_matchup_text
+    master_dict[game_id]['TWITTER_MATCHUP'] = tweet_text
 
     instagram_caption += "\n\n\n\n\n" + CONSTANTS.instagram_hashtags
-    instagram_caption += f"#{team1.team_name.replace(' ', '')} #{team2.team_name.replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
+    instagram_caption += f"#{(team1.team_city + team1.team_name).replace(' ', '')} #{(team2.team_city + team2.team_name).replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
 
     for i in range(10):
-        instagram_caption += f"#{players[i].full_name.replace(' ', '').replace('.', '').replace('-', '')} #{players[i].last_name.replace(' ', '').replace('.', '').replace('-', '')} "
+        full_name = players[i].full_name.replace(" ", '').replace('.', '').replace('-', '').replace('\'', '')
+        last_name = players[i].last_name.replace(' ', '').replace('.', '').replace('-', '').replace('\'', '')
+        instagram_caption += f"#{full_name} #{last_name} "
     
+    master_dict[game_id]['INSTAGRAM_CAPTION'] = instagram_caption
     print(instagram_caption)
 
     count  = 0
