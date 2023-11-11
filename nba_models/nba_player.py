@@ -6,6 +6,7 @@ class NBA_Player:
         self.person_id = row['personId']
         self.team_tricode = row['teamTricode']
         self.calculate_rating()
+        self.player_stats_array = [self.team_tricode, self.full_name, str(self.rating), str(self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl)]
 
     def calculate_rating(self):
         self.min = self.data['minutes']

@@ -55,7 +55,6 @@ total_tasks = 94
 
 def create_request(master_dict, game_ids, game_dict):
     key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
-    team_key_array = ['TEAM', 'W-L', 'PTS', 'RATING', 'FG', 'SH', 'AST', 'REB', 'BLK', 'STL', 'TOV']
 
     game_count = 1
     total_games = len(game_ids)
@@ -74,21 +73,16 @@ def create_request(master_dict, game_ids, game_dict):
         edit_top_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, game=master_dict[game])
         progress_bar.update(1)
 
-        get_team_keys(value=master_dict[game]["TEAMS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+        get_team_keys(value=master_dict[game]["TEAMS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, progress_bar=progress_bar, game_number=game_number)
 
-        # for team in master_dict[game]['TEAM']:
-        #     print(team)
-        #     for i in range(len(team_key_array)):
-        #         get_team_keys(key=team_key_array[i], value=team, i=team_count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
-        #         time.sleep(1)
-        #     team_count+=1
+        # for players in master_dict[game]['PLAYERS']:
+        #         # print(players.full_name)
+        #         for j in range(7):
+        #             get_special_keys(key=key_array[j], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+        #             time.sleep(1)
+        #         count += 1
 
-        for players in master_dict[game]['PLAYERS']:
-                # print(players.full_name)
-                for j in range(7):
-                    get_special_keys(key=key_array[j], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
-                    time.sleep(1)
-                count += 1
+        get_special_keys(value=master_dict[game]["PLAYERS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, progress_bar=progress_bar, game_number=game_number)
 
         progress_bar.set_description(game_number + "Downloading Images")
         get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
@@ -104,44 +98,54 @@ def create_request(master_dict, game_ids, game_dict):
     print(requests)
 
 
-def get_special_keys(key, value, i, PRESENTATION_COPY_ID):
-    if key == 'NAME':
-        replacement_key = '{' + key + str(i) + '}'
-        value = value.data['firstName'] + " " + value.data['familyName']
-    elif key == 'RATING':
-        replacement_key = '{' + 'RT' + str(i) + '}'
-        value = value.rating
-    elif key == 'PTS':
-        replacement_key = '{' + 'P' + str(i) + '}'
-        value = value.data['points']
-    elif key == 'REB':
-        replacement_key = '{' + 'RB' + str(i) + '}'
-        value = value.data['reboundsTotal']
-    elif key == 'AST':
-        replacement_key = '{' + 'A' + str(i) + '}'
-        value = value.data['assists']
-    elif key == 'DEF':
-        replacement_key = '{' + 'D' + str(i) + '}'
-        value = value.data['steals'] + value.data['blocks'] 
-    elif key == 'TEAM':
-        replacement_key = '{' + 'T' + str(i) + '}'
-        value = value.data['teamTricode']
-    else:
-       return
+def get_special_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
+    player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
 
-    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
+    for i in range(len(player_key_array)):
+        progress_bar.set_description(f"{game_number} Modifying Player {i}")
+        replacement_key = player_key_array[i] + str(i+1) + '}'
+        replacement_text = value[i].player_stats_array[i]
+        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
+        progress_bar.update(1)
+        time.sleep(1)
+
+    # if key == 'NAME':
+    #     replacement_key = '{' + key + str(i) + '}'
+    #     value = value.data['firstName'] + " " + value.data['familyName']
+    # elif key == 'RATING':
+    #     replacement_key = '{' + 'RT' + str(i) + '}'
+    #     value = value.rating
+    # elif key == 'PTS':
+    #     replacement_key = '{' + 'P' + str(i) + '}'
+    #     value = value.data['points']
+    # elif key == 'REB':
+    #     replacement_key = '{' + 'RB' + str(i) + '}'
+    #     value = value.data['reboundsTotal']
+    # elif key == 'AST':
+    #     replacement_key = '{' + 'A' + str(i) + '}'
+    #     value = value.data['assists']
+    # elif key == 'DEF':
+    #     replacement_key = '{' + 'D' + str(i) + '}'
+    #     value = value.data['steals'] + value.data['blocks'] 
+    # elif key == 'TEAM':
+    #     replacement_key = '{' + 'T' + str(i) + '}'
+    #     value = value.data['teamTricode']
+    # else:
+    #    return
+
+    # edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
 
 
-def get_team_keys(value, PRESENTATION_COPY_ID):
-    # team_keys = {'TEAM', 'W-L', 'PTS', 'RATING', 'FG', 'SH', 'AST', 'REB', 'BLK', 'STL', 'TOV'}
+def get_team_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
     team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT', '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
 
     for i in range(2):
         for j in range(len(team_key_array)):
+            progress_bar.set_description(f"{game_number} Modifying Team {i}")
             replacement_key = team_key_array[j] + str(i+1) + '}'
             replacement_text = value[i].team_stats_array[j]
-            # print(value[i].team_stats_array[j])
             edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
+            progress_bar.update(1)
             time.sleep(1)
 
 
@@ -194,31 +198,8 @@ def edit_text_slide(PRESENTATION_COPY_ID, replacement_key, replacement_text):
 
 
 def edit_top_slide(PRESENTATION_COPY_ID, game):
-    # requests = [
-    #     {
-    #         'replaceAllText': {
-    #             'containsText': {
-    #                 'text': '{{MATCH}}',
-    #                 'matchCase': False
-    #             },
-    #             'replaceText': game['SLIDE_MATCHUP']
-    #         }
-    #     }
-    # ]
-
+   
     edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{{MATCH}}', replacement_text=game['SLIDE_MATCHUP'])
-
-    # requests = [
-    #     {
-    #         'replaceAllText': {
-    #             'containsText': {
-    #                 'text': '{DATE}',
-    #                 'matchCase': False
-    #             },
-    #             'replaceText': CONSTANTS.yesterday_date_string
-    #         }
-    #     }
-    # ]
 
     edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{DATE}', replacement_text=CONSTANTS.yesterday_date_string)
 
