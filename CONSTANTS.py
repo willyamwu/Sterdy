@@ -45,6 +45,7 @@ yesterday_date_string = yesterday_date.strftime('%m/%d/%Y')    # Format yesterda
 
 # yesterday_date_string = '6/1/2023'
 
+# NBA Team Social Media Handles
 nba_teams_social_media = {
     "Atlanta Hawks": {"X": "@ATLHawks", "Instagram": "@atlhawks"},
     "Boston Celtics": {"X": "@celtics", "Instagram": "@celtics"},
