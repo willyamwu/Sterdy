@@ -106,7 +106,7 @@ def build_text(game_id):
     
     master_dict[game_id]['TWITTER_MATCHUP'] = tweet_text
 
-    instagram_caption += "\n\n\n\n\n" + CONSTANTS.instagram_hashtags
+    instagram_caption += "\n\n\n\n\n #basketball #bball #ball "
     instagram_caption += f"#{(team1.team_city + team1.team_name).replace(' ', '')} #{(team2.team_city + team2.team_name).replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
 
     for i in range(10):

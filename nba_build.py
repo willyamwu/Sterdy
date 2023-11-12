@@ -51,89 +51,62 @@ dir(slides_service)
 drive_service = build('drive', 'v3', credentials=creds)
 dir(drive_service)
 
-total_tasks = 94
+total_tasks = 97
+GREEN = "\033[92m"
+RESET_COLOR = "\033[0m"
 
 def create_request(master_dict, game_ids, game_dict):
-    key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
+    # key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
 
     game_count = 1
     total_games = len(game_ids)
 
     for game in game_ids:
-        game_number = f"Game {str(game_count)}/{total_games}:"
-        progress_bar = tqdm(total=total_tasks, desc=game_number, unit="task")
-        count = 1
-        team_count = 1
+        game_number = f"Game {str(game_count)}/{total_games}"
+        progress_bar = tqdm(total=total_tasks, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc=game_number, unit="task")
+        # count = 1
+        # team_count = 1
         
-        progress_bar.set_description(game_number + "Creating a Copy of the Slide")
-        PRESENTATION_COPY_ID = create_slide()
+        progress_bar.set_description(f"{game_number} Creating a Copy of the Slide")
+        PRESENTATION_COPY_ID = copy_slide()
         progress_bar.update(1)
 
-        progress_bar.set_description(game_number + "Date and Matchup text")
-        edit_top_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, game=master_dict[game])
+        progress_bar.set_description(f"{game_number} Updating Date text")
+        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{{MATCH}}', replacement_text=master_dict[game]['SLIDE_MATCHUP'])
+        progress_bar.update(1)
+        
+        progress_bar.set_description(f"{game_number} Updating Matchup text")
+        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{DATE}', replacement_text=CONSTANTS.yesterday_date_string)
         progress_bar.update(1)
 
         get_team_keys(value=master_dict[game]["TEAMS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, progress_bar=progress_bar, game_number=game_number)
 
-        # for players in master_dict[game]['PLAYERS']:
-        #         # print(players.full_name)
-        #         for j in range(7):
-        #             get_special_keys(key=key_array[j], value=players, i=count, PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
-        #             time.sleep(1)
-        #         count += 1
-
         get_special_keys(value=master_dict[game]["PLAYERS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, progress_bar=progress_bar, game_number=game_number)
 
-        progress_bar.set_description(game_number + "Downloading Images")
+        progress_bar.set_description(f"{game_number} Downloading Images")
         get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
         progress_bar.update(1)
 
-        progress_bar.set_description(game_number + "Deleting Slides")
+        progress_bar.set_description(f"{game_number} Deleting Slides")
         delete_slide(PRESENTATION_COPY_ID)
         progress_bar.update(1)
 
         game_count += 1
+        progress_bar.set_description(f"{game_number} COMPLETE")
         progress_bar.close()
-
-    print(requests)
 
 
 def get_special_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
     player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
 
-    for i in range(len(player_key_array)):
-        progress_bar.set_description(f"{game_number} Modifying Player {i}")
-        replacement_key = player_key_array[i] + str(i+1) + '}'
-        replacement_text = value[i].player_stats_array[i]
-        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
-        progress_bar.update(1)
-        time.sleep(1)
-
-    # if key == 'NAME':
-    #     replacement_key = '{' + key + str(i) + '}'
-    #     value = value.data['firstName'] + " " + value.data['familyName']
-    # elif key == 'RATING':
-    #     replacement_key = '{' + 'RT' + str(i) + '}'
-    #     value = value.rating
-    # elif key == 'PTS':
-    #     replacement_key = '{' + 'P' + str(i) + '}'
-    #     value = value.data['points']
-    # elif key == 'REB':
-    #     replacement_key = '{' + 'RB' + str(i) + '}'
-    #     value = value.data['reboundsTotal']
-    # elif key == 'AST':
-    #     replacement_key = '{' + 'A' + str(i) + '}'
-    #     value = value.data['assists']
-    # elif key == 'DEF':
-    #     replacement_key = '{' + 'D' + str(i) + '}'
-    #     value = value.data['steals'] + value.data['blocks'] 
-    # elif key == 'TEAM':
-    #     replacement_key = '{' + 'T' + str(i) + '}'
-    #     value = value.data['teamTricode']
-    # else:
-    #    return
-
-    # edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=str(value))
+    for i in range(10):
+        for j in range(len(player_key_array)):
+            replacement_key = player_key_array[j] + str(i+1) + '}'
+            progress_bar.set_description(f"{game_number} Modifying Player {i + 1} {replacement_key}")
+            replacement_text = value[i].player_stats_array[j]
+            edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
+            progress_bar.update(1)
+            time.sleep(1)
 
 
 def get_team_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
@@ -141,8 +114,8 @@ def get_team_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
 
     for i in range(2):
         for j in range(len(team_key_array)):
-            progress_bar.set_description(f"{game_number} Modifying Team {i}")
             replacement_key = team_key_array[j] + str(i+1) + '}'
+            progress_bar.set_description(f"{game_number} Modifying Team {i} {replacement_key}")
             replacement_text = value[i].team_stats_array[j]
             edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
             progress_bar.update(1)
@@ -161,7 +134,7 @@ def get_slide_id(id):
     return slide_ids
 
 
-def create_slide():
+def copy_slide():
 
     try:
         drive_response = drive_service.files().copy(
@@ -173,10 +146,9 @@ def create_slide():
 
     except HttpError as error:
         print(f"An error occurred: {error}")
-        print("Presentations  not copied")
+        print("Presentations not copied")
         return error
     
-    print(f'Copy of presentation created with ID: {PRESENTATION_COPY_ID}')
     return PRESENTATION_COPY_ID
 
 
@@ -195,13 +167,6 @@ def edit_text_slide(PRESENTATION_COPY_ID, replacement_key, replacement_text):
 
     response = slides_service.presentations().batchUpdate(
         presentationId=PRESENTATION_COPY_ID, body={'requests': request}).execute()
-
-
-def edit_top_slide(PRESENTATION_COPY_ID, game):
-   
-    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{{MATCH}}', replacement_text=game['SLIDE_MATCHUP'])
-
-    edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{DATE}', replacement_text=CONSTANTS.yesterday_date_string)
 
 
 def get_images(PRESENTATION_COPY_ID):
@@ -230,7 +195,6 @@ def get_images(PRESENTATION_COPY_ID):
         # Convert the image content to a PIL Image
         img = Image.open(BytesIO(response.content))
 
-
         file_path = game_number +  "_P" + str(slide_count) + '.jpg'
 
         slide_path.append(file_path)
@@ -241,8 +205,8 @@ def get_images(PRESENTATION_COPY_ID):
         
         slide_count += 1
 
-        print(all_image_paths)
-        print('Image downloaded and saved as JPEG.')
+        # print(all_image_paths)
+        # print('Image downloaded and saved as JPEG.')
 
     game_count += 1
 
@@ -250,7 +214,6 @@ def get_images(PRESENTATION_COPY_ID):
 def delete_slide(PRESENTATION_COPY_ID):
         try:
             drive_service.files().delete(fileId=PRESENTATION_COPY_ID).execute()
-            print(f'Presentation with ID {PRESENTATION_COPY_ID} deleted successfully.')
         except Exception as e:
             print(f'Error deleting presentation: {e}')
 
