@@ -13,11 +13,8 @@ from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, Pla
 from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
 
-
-# my_string = "This is a string with spaces"
 # my_string_without_spaces = my_string.replace(' ', '')
 # print(my_string_without_spaces)
-
 
 
 # # Specify the season and the team's ID (e.g., the ID for the Los Angeles Lakers is 1610612747)
@@ -49,21 +46,20 @@ from datetime import datetime, timedelta
 # print(team_stats_df["WINS"])
 
 
-from tqdm import tqdm
-import time
+# from tqdm import tqdm
+# import time
 
-# Your iterable (e.g., range, list, etc.)
-iterable = range(100)
+# # Your iterable (e.g., range, list, etc.)
+# iterable = range(100)
 
-GREEN = "\033[92m"
+# GREEN = "\033[92m"
 
-RESET_COLOR = "\033[0m"
+# RESET_COLOR = "\033[0m"
 
-# Wrap the iterable with tqdm
-for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc="Processing items", unit="item", total=len(iterable), leave=True):
-    # Your processing logic here
-    time.sleep(0.1)  # Simulating some work
-
+# # Wrap the iterable with tqdm
+# for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc="Processing items", unit="item", total=len(iterable), leave=True):
+#     # Your processing logic here
+#     time.sleep(0.1)  # Simulating some work
 
 
 # from nba_api.stats.endpoints import playerdashboardbylastngames
@@ -92,8 +88,8 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # # Display the player's statistics for the entire current season
 # print("p", player_stats_df)
 
-# game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string, 
-#                                        date_to_nullable=CONSTANTS.yesterday_date_string, 
+# game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string,
+#                                        date_to_nullable=CONSTANTS.yesterday_date_string,
 #                                        league_id_nullable='00').get_data_frames()[0]
 
 # # print(game_finder)
@@ -123,7 +119,7 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # player_id = '1629684'  # Replace with the player's ID you're interested in
 
 # print(teams.get_teams())
-            
+
 # # Get the player's stats for the specified game
 # boxscore = BoxScoreDefensiveV2(game_id=game_id).get_data_frames()[1]
 # print(boxscore)
@@ -140,10 +136,6 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 #     if(row['minutes']):
 #         print(row)
 #         break
-
-
-
-
 
 
 # game_id = unique_game_ids[0]
@@ -164,11 +156,6 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # # print(player_stats)
 
 # print("hi")
-
-
-
-
-
 
 
 # graph_url = 'https://graph.facebook.com/v17.0/'
@@ -203,11 +190,6 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # publish_container()
 
 
-
-
-
-
-
 # yesterday_date_string = '03/25/2023'
 
 
@@ -224,18 +206,14 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # parsed_date = datetime.strptime(yesterday_date_string, '%m/%d/%y')
 
 # formatted_date = parsed_date.strftime('%B %d, %Y')
-    
+
 #     # Get the day suffix (st, nd, rd, or th)
 # day_suffix = 'th' if 11 <= parsed_date.day <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(parsed_date.day % 10, 'th')
-    
+
 #     # Combine the formatted date and day suffix
 # final_formatted_date = formatted_date.replace(' ', f' {parsed_date.day}{day_suffix} ')
-    
+
 # print(final_formatted_date)
-
-
-
-
 
 
 # media_path = "downloaded_image.jpg"
@@ -266,16 +244,12 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # message = divide_post()
 
 
-
-
-
-
 # try:
 #     # Create the LeagueGameFinder endpoint with the desired parameters
 #     game_finder = LeagueGameFinder(date_from_nullable=yesterday_date_string, date_to_nullable=yesterday_date_string, league_id_nullable='00', team_id_nullable='1610612748')
 # except:
 #     print("error")
-    
+
 
 #     # Retrieve the game data
 # games = game_finder.get_data_frames()[0]
@@ -318,7 +292,7 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 # # Extract team abbreviations
 # home_team_abbr = game_summary['HOME_TEAM_ID'].iloc[0]
 # team_stats = game_summary[game_summary['HOME_TEAM_ID'] == home_team_abbr]
-# team_won = team_stats['TEAM_WINS_LOSSES'].iloc[0]  
+# team_won = team_stats['TEAM_WINS_LOSSES'].iloc[0]
 # # home_team_abbr = game_summary.at[0, 'TEAM_WINS_LOSSES']
 # print(team_won)
 # print(game_summary['VISITOR_TEAM_ID'].iloc[0])
@@ -326,8 +300,6 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 
 # # Print game summary data
 # print(game_summary)
-
-
 
 
 # # # teamlog = endpoints.TeamGameLog(season='2022', season_type_all_star='Regular Season', team_id= )
@@ -372,18 +344,18 @@ for item in tqdm(iterable, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_
 #     fg_percentage = fgm / fga if fga != 0 else 0
 #     fg3_percentage = fg3m / fg3a if fg3a != 0 else 0
 #     ft_percentage = ftm / fta if fta != 0 else 0
-    
+
 #     performance_rating = (
 #         points + o_rebounds + d_rebounds +
 #         fgm * 2 + fg3m + ftm +
 #         assists * 1.5 + steals * 2 + blocks * 2 -
 #         turnovers * 1.5 + plus_minus
-#     ) 
-    
+#     )
+
 #     # Incorporate shooting percentages
 #     shooting_percentage_bonus = (fg_percentage*2 + fg3_percentage*3 + ft_percentage) / 6
 #     performance_rating *= (1 + shooting_percentage_bonus)
-    
+
 #     return performance_rating
 
 # # Example statistics

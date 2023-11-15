@@ -5,7 +5,6 @@ import time
 import CONSTANTS
 from nba_models.nba_player import NBA_Player
 from nba_models.nba_team import NBA_Team
-from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, BoxScoreDefensiveV2
 from datetime import datetime, timedelta
 
@@ -15,15 +14,19 @@ unique_games = []
 game_dict = {}
 
 # Gets all the games that are played on a certain day.
+
+
 def get_games():
     try:
-        game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string, 
-                                       date_to_nullable=CONSTANTS.yesterday_date_string, 
+        game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string,
+                                       date_to_nullable=CONSTANTS.yesterday_date_string,
                                        league_id_nullable='00').get_data_frames()[0]
+
+        print(game_finder)
         if game_finder.empty:
             print("No games going on today :(")
             return
-    
+
     except:
         print("There was an error.")
         return
@@ -43,8 +46,10 @@ def get_games():
 
         master_dict[game]['DATE'] = CONSTANTS.yesterday_date_string
 
-        player_boxscore = BoxScoreTraditionalV3(game_id=game).get_data_frames()[0]
-        team_boxscore = BoxScoreTraditionalV3(game_id=game).get_data_frames()[2]
+        player_boxscore = BoxScoreTraditionalV3(
+            game_id=game).get_data_frames()[0]
+        team_boxscore = BoxScoreTraditionalV3(
+            game_id=game).get_data_frames()[2]
 
         for index, row in player_boxscore.iterrows():
             if (row['minutes']):
@@ -69,21 +74,23 @@ def get_games():
 def sort_players_by_rating(player_data):
     if len(player_data) <= 1:
         return player_data
-    
+
     pivot = player_data[len(player_data) // 2].rating
     left = [x for x in player_data if x.rating > pivot]
     middle = [x for x in player_data if x.rating == pivot]
     right = [x for x in player_data if x.rating < pivot]
-    
+
     return sort_players_by_rating(left) + middle + sort_players_by_rating(right)
+
 
 def get_matchup(game_finder, unique_games):
     for game in unique_games:
-        master_dict[game] = {"SCORE": [] }
+        master_dict[game] = {"SCORE": []}
 
-    for i in range(0, game_finder.shape[0]):     
-        id =  game_finder.at[i, 'GAME_ID']
-        master_dict[id]['SCORE'].append({game_finder.at[i, 'TEAM_NAME'].rstrip(' '): str(game_finder.at[i, 'PTS'])})
+    for i in range(0, game_finder.shape[0]):
+        id = game_finder.at[i, 'GAME_ID']
+        master_dict[id]['SCORE'].append(
+            {game_finder.at[i, 'TEAM_NAME'].rstrip(' '): str(game_finder.at[i, 'PTS'])})
 
 
 def build_text(game_id):
@@ -92,7 +99,8 @@ def build_text(game_id):
     players = master_dict[game_id]['PLAYERS']
 
     # Building the tweet text
-    tweet_text = "\U0001F6A8 #NBA Report for " + CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
+    tweet_text = "\U0001F6A8 #NBA Report for " + \
+        CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
 
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
@@ -103,21 +111,23 @@ def build_text(game_id):
     instagram_caption = tweet_text
 
     tweet_text += "\nOur Top 10 ⬇️"
-    
+
     master_dict[game_id]['TWITTER_MATCHUP'] = tweet_text
 
-    instagram_caption += "\n\n\n\n\n #basketball #bball #ball "
+    instagram_caption += "\n\n\n\n\n#basketball #bball #ball "
     instagram_caption += f"#{(team1.team_city + team1.team_name).replace(' ', '')} #{(team2.team_city + team2.team_name).replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
 
     for i in range(10):
-        full_name = players[i].full_name.replace(" ", '').replace('.', '').replace('-', '').replace('\'', '')
-        last_name = players[i].last_name.replace(' ', '').replace('.', '').replace('-', '').replace('\'', '')
+        full_name = players[i].full_name.replace(" ", '').replace(
+            '.', '').replace('-', '').replace('\'', '')
+        last_name = players[i].last_name.replace(' ', '').replace(
+            '.', '').replace('-', '').replace('\'', '')
         instagram_caption += f"#{full_name} #{last_name} "
-    
+
     master_dict[game_id]['INSTAGRAM_CAPTION'] = instagram_caption
     print(instagram_caption)
 
-    count  = 0
+    count = 0
     slide_matchup_text = ""
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
@@ -129,15 +139,6 @@ def build_text(game_id):
     master_dict[game_id]['SLIDE_MATCHUP'] = slide_matchup_text
 
     # print(slide_matchup_text)
-
-    
-
-
-
-
-
-
-
 
 
 # def divide_post(message):
@@ -154,7 +155,7 @@ def build_text(game_id):
 #         for i, j in enumerate(chunks):
 #             if j[0] == "":
 #                 print("hi")
-#             else:    
+#             else:
 #                 message_chunks.append(
 #                  f"".join(j).strip())
 #         return message_chunks
@@ -235,25 +236,25 @@ def build_text(game_id):
 
 # print("hello")
 
-# # find player Ids 
+# # find player Ids
 # from nba_api.stats.static import players
 # player_dict = players.get_players()
 
-# # Use ternary operator or write function 
+# # Use ternary operator or write function
 # bron = [player for player in player_dict if player['full_name'] == 'LeBron James'][0]
 # bron_id = bron['id']
 
 # # find team Ids
-# from nba_api.stats.static import teams 
+# from nba_api.stats.static import teams
 # teams = teams.get_teams()
 # GSW = [x for x in teams if x['full_name'] == 'Golden State Warriors'][0]
 # GSW_id = GSW['id']
 
 # #game_stats_player
-# #could not get DateFrom to work, just use loop with years if necessary 
+# #could not get DateFrom to work, just use loop with years if necessary
 # from nba_api.stats.library.parameters import SeasonAll
 # from nba_api.stats.endpoints import playergamelog
-# import pandas as pd 
+# import pandas as pd
 
 # gamelog_bron = playergamelog.PlayerGameLog(player_id='2544', season = '2018')
 # df_bron_games_2018 = gamelog_bron.get_data_frames()
@@ -265,7 +266,7 @@ def build_text(game_id):
 # from nba_api.stats.endpoints import leaguegamefinder
 # GSW_games = leaguegamefinder.LeagueGameFinder(team_id_nullable=GSW_id).get_data_frames()[0]
 
-# # game play by play data 
+# # game play by play data
 # from nba_api.stats.endpoints import playbyplay
 # pbp = playbyplay.PlayByPlay('0021900429').get_data_frames()[0]
 
@@ -281,7 +282,6 @@ def build_text(game_id):
 # top_500_avg = top_500.groupby(['player_name', 'player_id']).mean()[[
 #     'min', 'fgm', 'fga', 'ftm', 'fta', 'pts', 'fg3m', 'fg3a', 'gp'
 # ]]
-
 
 
 # def calculate_performance_rating(row):
@@ -307,12 +307,12 @@ def build_text(game_id):
     # plus_minus = game_stats.loc[0, 'PTS']
 
     # performance_rating = (
-    #     pts + reb + ast * 1.5 + 
+    #     pts + reb + ast * 1.5 +
     #     fgm + fg_3_m * 1.5 + ftm * 0.5 +
     #     stl * 2 + blk * 2 -
-    #     tov * 1.5 + 
+    #     tov * 1.5 +
     #     plus_minus
-    # ) 
+    # )
 
     # shooting_percentage_bonus = (fg_pct * 2 + fg_3_pct * 3 + ft_pct) / 6
     # performance_rating *= (1 + shooting_percentage_bonus)
@@ -320,7 +320,7 @@ def build_text(game_id):
     # performance_rating = round(performance_rating, 2)
 
     # player_data = CommonPlayerInfo(player_id=id).get_data_frames()[0]
-    
+
     # player_stat = {"NAME": player_data.at[0, 'DISPLAY_FIRST_LAST'], "TEAM":  player_data.at[0, 'TEAM_ABBREVIATION'], "RATING": performance_rating, "PTS": pts, "AST": ast, "REB": reb, "STL": stl, "BLK": blk, "DEF": stl + blk, "TOV": tov, "MIN": min}
 
     # return player_stat

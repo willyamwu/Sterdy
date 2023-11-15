@@ -55,6 +55,7 @@ total_tasks = 97
 GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
+
 def create_request(master_dict, game_ids, game_dict):
     # key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
 
@@ -63,25 +64,31 @@ def create_request(master_dict, game_ids, game_dict):
 
     for game in game_ids:
         game_number = f"Game {str(game_count)}/{total_games}"
-        progress_bar = tqdm(total=total_tasks, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc=game_number, unit="task")
+        progress_bar = tqdm(
+            total=total_tasks, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc=game_number, unit="task")
         # count = 1
         # team_count = 1
-        
-        progress_bar.set_description(f"{game_number} Creating a Copy of the Slide")
+
+        progress_bar.set_description(
+            f"{game_number} Creating a Copy of the Slide")
         PRESENTATION_COPY_ID = copy_slide()
         progress_bar.update(1)
 
         progress_bar.set_description(f"{game_number} Updating Date text")
-        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{{MATCH}}', replacement_text=master_dict[game]['SLIDE_MATCHUP'])
+        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID,
+                        replacement_key='{{MATCH}}', replacement_text=master_dict[game]['SLIDE_MATCHUP'])
         progress_bar.update(1)
-        
+
         progress_bar.set_description(f"{game_number} Updating Matchup text")
-        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key='{DATE}', replacement_text=CONSTANTS.yesterday_date_string)
+        edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID,
+                        replacement_key='{DATE}', replacement_text=CONSTANTS.yesterday_date_string)
         progress_bar.update(1)
 
-        get_team_keys(value=master_dict[game]["TEAMS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, progress_bar=progress_bar, game_number=game_number)
+        get_team_keys(value=master_dict[game]["TEAMS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID,
+                      progress_bar=progress_bar, game_number=game_number)
 
-        get_special_keys(value=master_dict[game]["PLAYERS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, progress_bar=progress_bar, game_number=game_number)
+        get_special_keys(value=master_dict[game]["PLAYERS"], PRESENTATION_COPY_ID=PRESENTATION_COPY_ID,
+                         progress_bar=progress_bar, game_number=game_number)
 
         progress_bar.set_description(f"{game_number} Downloading Images")
         get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
@@ -102,22 +109,27 @@ def get_special_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
     for i in range(10):
         for j in range(len(player_key_array)):
             replacement_key = player_key_array[j] + str(i+1) + '}'
-            progress_bar.set_description(f"{game_number} Modifying Player {i + 1} {replacement_key}")
+            progress_bar.set_description(
+                f"{game_number} Modifying Player {i + 1} {replacement_key}")
             replacement_text = value[i].player_stats_array[j]
-            edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
+            edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID,
+                            replacement_key=replacement_key, replacement_text=replacement_text)
             progress_bar.update(1)
             time.sleep(1)
 
 
 def get_team_keys(value, PRESENTATION_COPY_ID, progress_bar, game_number):
-    team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT', '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
+    team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
+                      '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
 
     for i in range(2):
         for j in range(len(team_key_array)):
             replacement_key = team_key_array[j] + str(i+1) + '}'
-            progress_bar.set_description(f"{game_number} Modifying Team {i} {replacement_key}")
-            replacement_text = value[i].team_stats_array[j]
-            edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, replacement_key=replacement_key, replacement_text=replacement_text)
+            progress_bar.set_description(
+                f"{game_number} Modifying Team {i} {replacement_key}")
+            replacement_text = f"{value[i].team_stats_array[j]}"
+            edit_text_slide(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID,
+                            replacement_key=replacement_key, replacement_text=replacement_text)
             progress_bar.update(1)
             time.sleep(1)
 
@@ -130,7 +142,7 @@ def get_slide_id(id):
     for slide in slides_data:
         slide_id = slide['objectId']
         slide_ids.append(slide_id)
-    
+
     return slide_ids
 
 
@@ -138,17 +150,17 @@ def copy_slide():
 
     try:
         drive_response = drive_service.files().copy(
-            fileId=PRESENTATION_ID, 
-            body = {'name': 'Copy of Match Details Template'}
+            fileId=PRESENTATION_ID,
+            body={'name': 'Copy of Match Details Template'}
         ).execute()
-        
+
         PRESENTATION_COPY_ID = drive_response.get('id')
 
     except HttpError as error:
         print(f"An error occurred: {error}")
         print("Presentations not copied")
         return error
-    
+
     return PRESENTATION_COPY_ID
 
 
@@ -195,14 +207,14 @@ def get_images(PRESENTATION_COPY_ID):
         # Convert the image content to a PIL Image
         img = Image.open(BytesIO(response.content))
 
-        file_path = game_number +  "_P" + str(slide_count) + '.jpg'
+        file_path = game_number + "_P" + str(slide_count) + '.jpg'
 
         slide_path.append(file_path)
 
         all_image_paths[game_number].append(file_path)
 
         img.save(file_path, 'JPEG')
-        
+
         slide_count += 1
 
         # print(all_image_paths)
@@ -212,10 +224,11 @@ def get_images(PRESENTATION_COPY_ID):
 
 
 def delete_slide(PRESENTATION_COPY_ID):
-        try:
-            drive_service.files().delete(fileId=PRESENTATION_COPY_ID).execute()
-        except Exception as e:
-            print(f'Error deleting presentation: {e}')
+    try:
+        drive_service.files().delete(fileId=PRESENTATION_COPY_ID).execute()
+    except Exception as e:
+        print(f'Error deleting presentation: {e}')
+
 
 def remove_all_photos(all_image_paths):
     for key, value in all_image_paths.items():
@@ -231,13 +244,6 @@ def remove_all_photos(all_image_paths):
     #         print(image)
     #         os.remove(image)
     #         print("Image ", image, " removed.")
-
-
-
-
-
-
-
 
 
 # with open("catpic.jpg", "wb") as handler:
