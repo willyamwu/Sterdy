@@ -13,6 +13,23 @@ from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, Pla
 from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
 
+from nba_api.stats.static import players
+
+# Get all active NBA players
+nba_players = players.get_players()
+
+# Find Stephen Curry in the list
+stephen_curry = [
+    player for player in nba_players if player['full_name'] == 'Damian Lillard']
+
+# Print the player ID if found
+if stephen_curry:
+    player_id = stephen_curry[0]['id']
+    print(f"Stephen Curry's player ID is: {player_id}")
+else:
+    print("Stephen Curry not found in the list of NBA players.")
+
+
 # my_string_without_spaces = my_string.replace(' ', '')
 # print(my_string_without_spaces)
 

@@ -102,27 +102,29 @@ def build_text(game_id):
     tweet_text = "\U0001F6A8 #NBA Report for " + \
         CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
 
+    instagram_caption = ""
+
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
             tweet_text = tweet_text + key + ": " + value + "\n"
+            instagram_caption = instagram_caption + key + ": " + value + "\n"
 
     tweet_text += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
-
-    instagram_caption = tweet_text
-
-    tweet_text += "\nOur Top 10 ⬇️"
+    instagram_caption += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
 
     master_dict[game_id]['TWITTER_MATCHUP'] = tweet_text
 
-    instagram_caption += "\n\n\n\n\n#basketball #bball #ball "
+    instagram_caption += "\n\n\n\n\n#nba #basketball #bball #🏀 "
     instagram_caption += f"#{(team1.team_city + team1.team_name).replace(' ', '')} #{(team2.team_city + team2.team_name).replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
 
     for i in range(10):
         full_name = players[i].full_name.replace(" ", '').replace(
             '.', '').replace('-', '').replace('\'', '')
-        last_name = players[i].last_name.replace(' ', '').replace(
-            '.', '').replace('-', '').replace('\'', '')
-        instagram_caption += f"#{full_name} #{last_name} "
+        # last_name = players[i].last_name.replace(' ', '').replace(
+        #     '.', '').replace('-', '').replace('\'', '')
+        instagram_caption += f"#{full_name} "
+
+    instagram_caption += "#espn #overtime #houseofhighlights"
 
     master_dict[game_id]['INSTAGRAM_CAPTION'] = instagram_caption
     print(instagram_caption)
