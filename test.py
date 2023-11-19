@@ -1,3 +1,4 @@
+from nba_api.stats.static import teams
 import json
 import math
 import re
@@ -28,6 +29,21 @@ if stephen_curry:
     print(f"Stephen Curry's player ID is: {player_id}")
 else:
     print("Stephen Curry not found in the list of NBA players.")
+
+
+# Get all NBA teams
+nba_teams = teams.get_teams()
+
+# Find the Atlanta Hawks
+atlanta_hawks = [
+    team for team in nba_teams if team['full_name'] == 'Atlanta Hawks']
+
+# Print the team ID if found
+if atlanta_hawks:
+    team_id = atlanta_hawks[0]['id']
+    print("Atlanta Hawks Team ID:", team_id)
+else:
+    print("Atlanta Hawks not found in the NBA teams list.")
 
 
 # my_string_without_spaces = my_string.replace(' ', '')

@@ -94,6 +94,17 @@ def get_matchup(game_finder, unique_games):
 
 
 def build_text(game_id):
+    count = 0
+    slide_matchup_text = ""
+    for item in master_dict[game_id]['SCORE']:
+        for key, value in item.items():
+            slide_matchup_text = slide_matchup_text + key
+            if count == 0:
+                slide_matchup_text = slide_matchup_text + " @ "
+            count += 1
+
+    master_dict[game_id]['SLIDE_MATCHUP'] = slide_matchup_text
+
     team1 = master_dict[game_id]['TEAMS'][0]
     team2 = master_dict[game_id]['TEAMS'][1]
     players = master_dict[game_id]['PLAYERS']
@@ -102,7 +113,7 @@ def build_text(game_id):
     tweet_text = "\U0001F6A8 #NBA Report for " + \
         CONSTANTS.yesterday_date_string + " \U0001F6A8\n\n"
 
-    instagram_caption = ""
+    instagram_caption = f"{master_dict[game_id]['SLIDE_MATCHUP']} {CONSTANTS.yesterday_date_string}\n\n"
 
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
@@ -128,17 +139,6 @@ def build_text(game_id):
 
     master_dict[game_id]['INSTAGRAM_CAPTION'] = instagram_caption
     print(instagram_caption)
-
-    count = 0
-    slide_matchup_text = ""
-    for item in master_dict[game_id]['SCORE']:
-        for key, value in item.items():
-            slide_matchup_text = slide_matchup_text + key
-            if count == 0:
-                slide_matchup_text = slide_matchup_text + " @ "
-            count += 1
-
-    master_dict[game_id]['SLIDE_MATCHUP'] = slide_matchup_text
 
     # print(slide_matchup_text)
 
