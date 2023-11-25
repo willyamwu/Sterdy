@@ -125,6 +125,9 @@ def create_request(master_dict, game_ids, game_dict):
     total_games = len(game_ids)
 
     for game in game_ids:
+        player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
+        team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
+                          '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
         slide_requests = []
         game_number = f"Game {str(game_count)}/{total_games}"
         progress_bar = tqdm(
@@ -148,11 +151,11 @@ def create_request(master_dict, game_ids, game_dict):
 
         progress_bar.update(1)
 
-        slide_requests = get_team_keys(value=master_dict[game]["TEAMS"],
-                                       progress_bar=progress_bar, game_number=game_number, requests=slide_requests)
+        slide_requests = get_special_keys(value=master_dict[game]["TEAMS"],
+                                          progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=team_key_array, iterations=2)
 
         slide_requests = get_special_keys(value=master_dict[game]["PLAYERS"],
-                                          progress_bar=progress_bar, game_number=game_number, requests=slide_requests)
+                                          progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=player_key_array, iterations=10)
 
         slides_service.presentations().batchUpdate(
             presentationId=PRESENTATION_COPY_ID, body={'requests': slide_requests}).execute()
@@ -171,15 +174,13 @@ def create_request(master_dict, game_ids, game_dict):
         time.sleep(10)
 
 
-def get_special_keys(value, progress_bar, game_number, requests):
-    player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
-
-    for i in range(10):
-        for j in range(len(player_key_array)):
-            replacement_key = player_key_array[j] + str(i+1) + '}'
+def get_special_keys(value, progress_bar, game_number, requests, key_array, iterations):
+    for i in range(iterations):
+        for j in range(len(key_array)):
+            replacement_key = key_array[j] + str(i+1) + '}'
             progress_bar.set_description(
-                f"{game_number} Modifying Player {i + 1} {replacement_key}")
-            replacement_text = value[i].player_stats_array[j]
+                f"{game_number} Modifying {replacement_key}")
+            replacement_text = value[i].stats_array[j]
             requests = edit_text_request(
                 requests, replacement_key, replacement_text)
             progress_bar.update(1)
@@ -188,22 +189,22 @@ def get_special_keys(value, progress_bar, game_number, requests):
     return requests
 
 
-def get_team_keys(value, progress_bar, game_number, requests):
-    team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
-                      '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
+# def get_team_keys(value, progress_bar, game_number, requests):
+#     team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
+#                       '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
 
-    for i in range(2):
-        for j in range(len(team_key_array)):
-            replacement_key = team_key_array[j] + str(i+1) + '}'
-            progress_bar.set_description(
-                f"{game_number} Modifying Team {i} {replacement_key}")
-            replacement_text = f"{value[i].team_stats_array[j]}"
-            requests = edit_text_request(
-                requests, replacement_key, replacement_text)
-            progress_bar.update(1)
-            time.sleep(0.05)
+#     for i in range(2):
+#         for j in range(len(team_key_array)):
+#             replacement_key = team_key_array[j] + str(i+1) + '}'
+#             progress_bar.set_description(
+#                 f"{game_number} Modifying Team {i} {replacement_key}")
+#             replacement_text = f"{value[i].team_stats_array[j]}"
+#             requests = edit_text_request(
+#                 requests, replacement_key, replacement_text)
+#             progress_bar.update(1)
+#             time.sleep(0.05)
 
-    return requests
+#     return requests
 
 
 def get_slide_id(id):

@@ -7,6 +7,7 @@ start_up_prompt = '''(1) Daily Game Analysis
 (2) Player Rankings 
 (3) Team Rankings'''
 
+
 def main():
     print("Target Date:", CONSTANTS.yesterday_date_string)
     # Uncomment in event of multiple functions added
@@ -21,17 +22,21 @@ def main():
     # nba_post.twitter_post(nba_build.all_image_paths, nba_data.master_dict, nba_data.unique_games)
     # nba_build.remove_all_photos(nba_build.all_image_paths)
 
-# Generates 
+# Generates
+
+
 def path_finder():
-    while(True):
+    while (True):
         user_input = input("Choose a command: ")
         if user_input == "1":
             print("Daily Game Analysis -- SELECTED")
             # Activate nba scripts
             nba_data.get_games()
             # print(nba_data.master_dict)
-            nba_build.create_request(nba_data.master_dict, nba_data.unique_games, nba_data.game_dict)
-            nba_post.twitter_post(nba_build.all_image_paths, nba_data.master_dict, nba_data.unique_games)
+            nba_build.create_request(
+                nba_data.master_dict, nba_data.unique_games, nba_data.game_dict)
+            nba_post.twitter_post(nba_build.all_image_paths,
+                                  nba_data.master_dict, nba_data.unique_games)
             # nba_build.remove_all_photos(nba_build.all_image_paths)
             print("OPERATION COMPLETE")
             break

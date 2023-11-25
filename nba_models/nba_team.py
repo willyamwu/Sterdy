@@ -12,7 +12,7 @@ class NBA_Team:
         self.team_slug = data['teamSlug']
         self.calculate_rating()
         self.get_season_stats()
-        self.team_stats_array = [f"{self.team_slug.title()}{self.conference_ranking}", f"{str(self.wins)}-{str(self.loses)}", str(self.pts), str(self.rating), self.fg, str(
+        self.stats_array = [f"{self.team_slug.title()}{self.conference_ranking}", f"{str(self.wins)}-{str(self.loses)}", str(self.pts), str(self.rating), self.fg, str(
             self.ast), str(self.reb), str(self.blk), str(self.stl), str(self.tov), str(self.average_shooting_percentage) + "%"]
 
     def calculate_rating(self):

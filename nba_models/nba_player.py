@@ -6,7 +6,8 @@ class NBA_Player:
         self.person_id = row['personId']
         self.team_tricode = row['teamTricode']
         self.calculate_rating()
-        self.player_stats_array = [self.team_tricode, self.full_name, str(self.rating), str(self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl)]
+        self.stats_array = [self.team_tricode, self.full_name, str(self.rating), str(
+            self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl)]
 
     def calculate_rating(self):
         self.min = self.data['minutes']
@@ -16,7 +17,7 @@ class NBA_Player:
         self.fg_3_m = self.data['threePointersMade']
         # fg_3_a = self.data['FG3A']
         self.fg_3_pct = self.data['threePointersPercentage']
-        self.ftm = self.data ['freeThrowsMade']
+        self.ftm = self.data['freeThrowsMade']
         # fta = self.data['FTA']
         self.ft_pct = self.data['freeThrowsPercentage']
         self.reb = self.data['reboundsTotal']
@@ -25,17 +26,18 @@ class NBA_Player:
         self.blk = self.data['blocks']
         self.tov = self.data['turnovers']
         self.pts = self.data['points']
-        self.plus_minus = self.data ['plusMinusPoints']
+        self.plus_minus = self.data['plusMinusPoints']
 
         performance_rating = (
-            self.pts * 1.5 + self.reb * 0.75 + self.ast * 1.25 + 
+            self.pts * 1.5 + self.reb * 0.75 + self.ast * 1.25 +
             self.fgm + self.fg_3_m * 1.5 + self.ftm * 0.5 +
             self.stl * 1.75 + self.blk * 1.75 -
-            self.tov * 2 + 
+            self.tov * 2 +
             self.plus_minus
-        ) 
+        )
 
-        self.average_shooting_percentage = (self.fg_pct * 2 + self.fg_3_pct * 3 + self.ft_pct) / 6
+        self.average_shooting_percentage = (
+            self.fg_pct * 2 + self.fg_3_pct * 3 + self.ft_pct) / 6
         performance_rating *= (1 + self.average_shooting_percentage)
 
         self.rating = round(performance_rating, 2)
@@ -43,7 +45,7 @@ class NBA_Player:
     def player_of_the_match(self):
         text = f"\nPOTG: 🔥{self.full_name.upper()}🔥 ({self.team_tricode})\n"
         text += f"{self.rating} RATING\n"
-        
+
         if self.pts > 0:
             text += f"{self.pts} PTS\n"
         if self.ast > 0:
@@ -58,5 +60,3 @@ class NBA_Player:
             text += f"+{self.plus_minus} +/-\n"
 
         return text
-        
-

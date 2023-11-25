@@ -14,7 +14,341 @@ from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, Pla
 from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
 
-from nba_api.stats.static import players
+import json
+from logging import Logger
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from googleapiclient.http import MediaIoBaseDownload
+import io
+import requests
+import os
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+import CONSTANTS
+from PIL import Image
+from io import BytesIO
+import time
+from tqdm import tqdm
+
+CLIENT_FILE = 'client_secret.json'
+CLIENT_ID = CONSTANTS.GOOGLE_CLIENT_ID
+CLIENT_SECRET = CONSTANTS.GOOGLE_CLIENT_SECRET
+PRESENTATION_ID = '1OkCzw0NV6ikJItZn2uU4Fxsd5ae2mDR31FLVkezsk7o'
+
+SCOPES = (
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/presentations',
+)
+
+game_count = 1
+all_image_paths = {}
+
+# Creating credentials
+creds = None
+
+if os.path.exists('token.json'):
+    creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
+if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+    else:
+        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_FILE, SCOPES)
+        creds = flow.run_local_server(port=0)
+    with open('token.json', 'w') as token:
+        token.write(creds.to_json())
+
+# Building the services
+slides_service = build('slides', 'v1', credentials=creds)
+dir(slides_service)
+
+drive_service = build('drive', 'v3', credentials=creds)
+dir(drive_service)
+
+total_tasks = 97
+GREEN = "\033[92m"
+RESET_COLOR = "\033[0m"
+
+
+# page_elements = slide.get('pageElements')
+
+# def get_slide_id(id):
+presentation = slides_service.presentations().get(
+    presentationId=PRESENTATION_ID).execute()
+
+slides_data = presentation.get('slides', [])
+slide_ids = []
+for slide in slides_data:
+    slide_id = slide['objectId']
+    slide_ids.append(slide_id)
+
+slide = slide_ids[0]
+print(slide)
+
+
+IMAGE_URL = (
+    "https://cdn.nba.com/logos/nba/1610612737/primary/L/logo.svg"
+)
+
+print("hi")
+# The image URL.
+IMAGE_URL = 'https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/203507.png'
+
+
+requests = []
+image_id = "MyImage_11"
+emu4M = {"magnitude": 4000000, "unit": "EMU"}
+requests.append(
+    {
+        "createImage": {
+            "objectId": image_id,
+            "url": IMAGE_URL,
+            "elementProperties": {
+                "pageObjectId": slide,
+                "size": {"height": emu4M, "width": emu4M},
+                "transform": {
+                    "scaleX": 1.25,
+                    "scaleY": 1.25,
+                    "translateX": 2644696,
+                    "translateY": 1911096,
+                    "unit": "EMU",
+                },
+            },
+        }
+    }
+)
+
+# Execute the request.
+body = {"requests": requests}
+response = (
+    slides_service.presentations()
+    .batchUpdate(presentationId=PRESENTATION_ID, body=body)
+    .execute()
+)
+create_image_response = response.get("replies")[0].get("createImage")
+print(f"Created image with ID: {(create_image_response.get('objectId'))}")
+
+
+quit()
+
+# from nba_api.stats.static import players
+
+# from nba_api.stats.endpoints import shotchartdetail
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# import pandas as pd
+# from matplotlib.patches import Circle
+
+# # Specify the player and team
+# player_id = 201939  # Stephen Curry's player ID
+# team_id = 1610612744  # Golden State Warriors' team ID
+
+# # Fetch shot chart data
+# shot_chart = shotchartdetail.ShotChartDetail(
+#     player_id=player_id,
+#     team_id=team_id,
+#     season_type_all_star='Regular Season',
+#     context_measure_simple='FGA'
+# )
+# shot_data = shot_chart.get_data_frames()[0]
+
+
+# def draw_court():
+#     # Draw court lines
+#     plt.plot([-250, 250], [0, 0], color='black')  # Baseline
+#     plt.plot([-250, 250], [500, 500], color='black')  # Baseline
+#     plt.plot([-250, -250], [0, 500], color='black')  # Left sideline
+#     plt.plot([250, 250], [0, 500], color='black')  # Right sideline
+#     plt.plot([-250, 250], [250, 250], color='black')  # Center line
+
+#     # Draw three-point line
+#     plt.plot([-220, -220], [0, 140], color='black')
+#     plt.plot([220, 220], [0, 140], color='black')
+#     plt.plot([-220, -250], [140, 140], color='black')
+#     plt.plot([220, 250], [140, 140], color='black')
+#     plt.plot([0, 0], [140, 500], color='black')
+
+#     # Draw free-throw circle
+#     circle = plt.Circle((0, 250), 60, fill=False, color='black')
+#     plt.gca().add_patch(circle)
+
+#     # Add labels
+#     plt.text(0, 470, 'NBA', ha='center',
+#              va='center', fontsize=10, color='black')
+#     plt.text(0, 480, '3-Point Line', ha='center',
+#              va='center', fontsize=10, color='black')
+
+
+# # Set up the plot
+# plt.figure(figsize=(12, 11))
+# plt.scatter(shot_data.LOC_X, shot_data.LOC_Y,
+#             c=shot_data.SHOT_MADE_FLAG, cmap='bwr', s=30, alpha=0.6)
+
+# # Customize plot
+# plt.title(f"Curry Shot Chart")
+# plt.gca().set_aspect('equal', adjustable='box')
+# plt.xlim(-250, 250)
+# plt.ylim(0, 500)
+
+# # Draw court lines and add labels
+# draw_court()
+# plt.show()
+
+
+# # Define the parameters for the API request
+# params = {
+#     'player_id': player_id,  # Corrected parameter name
+#     'team_id': team_id,
+#     'season_type_all_star': 'Regular Season',
+#     'context_measure_simple': 'FGA',
+#     'last_n_games': 0,
+#     'league_id': '00',
+# }
+
+# # Make the API request
+# shot_data = shotchartdetail.ShotChartDetail(**params)
+# shot_chart = shot_data.get_data_frames()[0]
+
+# # Plot the shot chart
+# plt.figure(figsize=(12, 11))
+# plt.scatter(shot_chart['LOC_X'], shot_chart['LOC_Y'],
+#             c='blue', marker='o', s=50, alpha=0.5)
+# plt.title('Stephen Curry Shot Chart (2022-2023 Season)')
+# plt.xlabel('X - Distance from the basket (feet)')
+# plt.ylabel('Y - Distance from the baseline (feet)')
+# plt.xlim(-250, 250)
+# plt.ylim(-47.5, 422.5)
+# plt.show()
+
+
+# import requests
+# import matplotlib.pyplot as plt
+# from matplotlib.patches import Circle, Rectangle, Arc
+# from nba_api.stats.endpoints import ShotChartDetail
+
+
+# def draw_court(ax=None, color='black', lw=2, outer_lines=False):
+#     # If an axes object isn't provided to plot onto, just get the current one
+#     if ax is None:
+#         ax = plt.gca()
+
+#     # Create the various parts of an NBA basketball court
+
+#     # Create the hoop
+#     hoop = Circle((0, 0), radius=7.5, linewidth=lw, color=color, fill=False)
+
+#     # Create backboard
+#     backboard = Rectangle((-30, -7.5), 60, 0, linewidth=lw, color=color)
+
+#     # The paint
+#     # Create the outer box 0f the paint, width=16ft, height=19ft
+#     outer_box = Rectangle((-80, -47.5), 160, 190,
+#                           linewidth=lw, color=color, fill=False)
+#     # Create the inner box of the paint, widt=12ft, height=19ft
+#     inner_box = Rectangle((-60, -47.5), 120, 190,
+#                           linewidth=lw, color=color, fill=False)
+
+#     # Create free-throw line
+#     free_throw_circle = Circle(
+#         (0, 142.5), radius=15, linewidth=lw, color=color, fill=False)
+#     free_throw_circle_arc = Arc(
+#         (0, 142.5), 15, 15, theta1=0, theta2=180, linewidth=lw, color=color)
+
+#     # Restricted Zone, it is an arc with 4ft radius from center of the hoop
+#     restricted_area = Arc((0, 0), 80, 80, theta1=0,
+#                           theta2=180, linewidth=lw, color=color)
+
+#     # Three-point line
+#     # Create the side 3pt lines, they are 22ft away from the hoop
+#     corner_three_a = Rectangle(
+#         (-220, -47.5), 0, 140, linewidth=lw, color=color)
+#     corner_three_b = Rectangle((220, -47.5), 0, 140, linewidth=lw, color=color)
+#     # Create the 3pt arc - center of arc will be the hoop, arc is 23.75 ft away from hoop
+#     three_arc = Arc((0, 0), 475, 475, theta1=22,
+#                     theta2=158, linewidth=lw, color=color)
+
+#     # Center Court
+#     center_outer_arc = Arc((0, 422.5), 120, 120, theta1=180,
+#                            theta2=0, linewidth=lw, color=color)
+#     center_inner_arc = Arc((0, 422.5), 40, 40, theta1=180,
+#                            theta2=0, linewidth=lw, color=color)
+
+#     # List of the court elements to be plotted onto the axes
+#     court_elements = [hoop, backboard, outer_box, inner_box, free_throw_circle, free_throw_circle_arc,
+#                       restricted_area, corner_three_a, corner_three_b, three_arc, center_outer_arc, center_inner_arc]
+
+#     # Draw the court elements onto the axes
+#     for element in court_elements:
+#         ax.add_patch(element)
+
+#     return ax
+
+
+# def plot_shot_chart(player_id, season, game_id, team_id):
+#     # Get shot chart data using NBA API
+#     shot_chart_detail = ShotChartDetail(
+#         player_id=player_id, season=season, game_id=game_id, team_id=team_id)
+#     shot_data = shot_chart_detail.get_data_frames()[0]
+
+#     # Set up the plot
+#     fig, ax = plt.subplots(figsize=(12, 11))
+#     draw_court(ax)
+#     plt.xlim(-250, 250)
+#     plt.ylim(422.5, -47.5)
+
+#     # Plot the shots
+#     plt.scatter(shot_data['LOC_X'], shot_data['LOC_Y'],
+#                 c='green', s=10, alpha=0.6)
+
+#     # Display the plot
+#     plt.show()
+
+
+# # Example usage
+# player_id = 201939  # Stephen Curry's player ID
+# season = '2022-23'
+# game_id = '0022200010'  # Replace with the actual game ID
+# team_id = None  # Set to None to get all teams
+# plot_shot_chart(player_id, season, game_id, team_id)
+
+
+# from nba_api.stats.endpoints import playbyplay, PlayByPlayV3
+
+# # Specify the game ID for the desired game
+# game_id = '0011900001'  # Replace this with the actual game ID
+
+# plays = PlayByPlayV3(game_id).get_data_frames()[0]
+
+
+# field_goals = [row for index,
+#                row in plays.iterrows()]
+
+# print(field_goals)
+
+# # Fetch the play-by-play data for the specified game
+# pbp = playbyplay.PlayByPlay(game_id)
+
+# # Get the play data
+# plays = pbp.get_normalized_dict()['PlayByPlay']
+
+
+# # Filter out plays that are not field goals
+# field_goals = [play for play in plays if play['EVENTMSGTYPE'] == 1]
+
+# # Sort field goals by score margin (descending order)
+# sorted_field_goals = sorted(
+#     field_goals, key=lambda x: x['score_margin'], reverse=True)
+
+# # Get the top 5 plays
+# top_5_plays = sorted_field_goals[:5]
+
+# # Print or process the top 5 plays
+# for i, play in enumerate(top_5_plays, start=1):
+#     print(
+#         f"Top Play {i}: {play['HOMEDESCRIPTION']} vs {play['VISITORDESCRIPTION']}")
+
 
 # Get all active NBA players
 nba_players = players.get_players()
