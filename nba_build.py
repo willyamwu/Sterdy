@@ -21,6 +21,10 @@ CLIENT_ID = CONSTANTS.GOOGLE_CLIENT_ID
 CLIENT_SECRET = CONSTANTS.GOOGLE_CLIENT_SECRET
 PRESENTATION_ID = '1ZF738FmLMrL22Ig-0c1UqrELf69X60de21fJZV9fpjw'
 
+player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
+team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
+                  '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
+
 SCOPES = (
     'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/presentations',
@@ -119,26 +123,26 @@ RESET_COLOR = "\033[0m"
 
 
 def create_request(master_dict, game_ids, game_dict):
-    # key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
 
     game_count = 1
     total_games = len(game_ids)
 
     for game in game_ids:
-        player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
-        team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
-                          '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
         slide_requests = []
         game_number = f"Game {str(game_count)}/{total_games}"
         progress_bar = tqdm(
             total=total_tasks, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc=game_number, unit="task")
-        # count = 1
-        # team_count = 1
 
         progress_bar.set_description(
             f"{game_number} Creating a Copy of the Slide")
         PRESENTATION_COPY_ID = copy_slide()
         progress_bar.update(1)
+
+        slide_ids = get_slide_id(PRESENTATION_ID)
+
+        for i in range(3):
+            edit_image_request(
+                requests=requests, slide=slide_ids[i], image_url=f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{master_dict[game]['PLAYERS'][i].person_id}.png", image_id=f"Image {i}")
 
         progress_bar.set_description(f"{game_number} Updating Date text")
         slide_requests = edit_text_request(slide_requests, '{{MATCH}}',
@@ -250,6 +254,31 @@ def edit_text_request(requests, replacement_key, replacement_text):
         }
     )
 
+    return requests
+
+
+def edit_image_request(requests, image_id, image_url, slide):
+    emu4M = {"magnitude": 4000000, "unit": "EMU"}
+
+    requests.append(
+        {
+            "createImage": {
+                "objectId": image_id,
+                "url": image_url,
+                "elementProperties": {
+                    "pageObjectId": slide,
+                    "size": {"height": emu4M, "width": emu4M},
+                    "transform": {
+                        "scaleX": 1.25,
+                        "scaleY": 1.25,
+                        "translateX": 2644696,
+                        "translateY": 1911096,
+                        "unit": "EMU",
+                    },
+                },
+            }
+        }
+    )
     return requests
 
 
