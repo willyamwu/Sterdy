@@ -118,7 +118,7 @@ RESET_COLOR = "\033[0m"
 # quit()
 
 
-def create_request(master_dict, game_ids, game_dict):
+def create_request(master_dict, game_ids):
     # key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
 
     game_count = 1
