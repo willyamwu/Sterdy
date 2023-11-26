@@ -6,19 +6,20 @@ class NBA_Player:
         self.person_id = row['personId']
         self.team_tricode = row['teamTricode']
         self.calculate_rating()
+        self.get_letter_grade()
         self.stats_array = [self.team_tricode, self.full_name, str(self.rating), str(
-            self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl)]
+            self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl), str(self.plus_minus), str(self.fgm) + "/" + str(self.fga), str(self.ftm) + "/" + str(self.fta), str(round(self.average_shooting_percentage * 100, 1)) + "%", self.letter_grade]
 
     def calculate_rating(self):
         self.min = self.data['minutes']
         self.fgm = self.data['fieldGoalsMade']
-        # fga = self.data['FGA']
+        self.fga = self.data['fieldGoalsAttempted']
         self.fg_pct = self.data['fieldGoalsPercentage']
         self.fg_3_m = self.data['threePointersMade']
         # fg_3_a = self.data['FG3A']
         self.fg_3_pct = self.data['threePointersPercentage']
         self.ftm = self.data['freeThrowsMade']
-        # fta = self.data['FTA']
+        self.fta = self.data['freeThrowsAttempted']
         self.ft_pct = self.data['freeThrowsPercentage']
         self.reb = self.data['reboundsTotal']
         self.ast = self.data['assists']
@@ -60,3 +61,25 @@ class NBA_Player:
             text += f"+{self.plus_minus} +/-\n"
 
         return text
+
+    def get_letter_grade(self):
+        if self.rating > 225:
+            self.letter_grade = "A+"
+        elif self.rating > 160:
+            self.letter_grade = "A"
+        elif self.rating > 120:
+            self.letter_grade = "A-"
+        elif self.rating > 100:
+            self.letter_grade = "B+"
+        elif self.rating > 80:
+            self.letter_grade = "B"
+        elif self.rating > 60:
+            self.letter_grade = "B-"
+        elif self.rating > 50:
+            self.letter_grade = "C+"
+        elif self.rating > 35:
+            self.letter_grade = "C"
+        elif self.rating > 25:
+            self.letter_grade = "C-"
+        else:
+            self.letter_grade = "D"

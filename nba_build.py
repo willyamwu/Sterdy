@@ -19,9 +19,10 @@ from tqdm import tqdm
 CLIENT_FILE = 'client_secret.json'
 CLIENT_ID = CONSTANTS.GOOGLE_CLIENT_ID
 CLIENT_SECRET = CONSTANTS.GOOGLE_CLIENT_SECRET
-PRESENTATION_ID = '1ZF738FmLMrL22Ig-0c1UqrELf69X60de21fJZV9fpjw'
+PRESENTATION_ID = '1OkCzw0NV6ikJItZn2uU4Fxsd5ae2mDR31FLVkezsk7o'
 
-player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB', '{A', '{D']
+player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB',
+                    '{A', '{D', '{PM', '{FG', '{FT', '{SH', '{L']
 team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
                   '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
 
@@ -55,7 +56,7 @@ dir(slides_service)
 drive_service = build('drive', 'v3', credentials=creds)
 dir(drive_service)
 
-total_tasks = 97
+total_tasks = 147
 GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
@@ -141,11 +142,11 @@ def create_request(master_dict, game_ids, game_dict):
         slide_ids = get_slide_id(PRESENTATION_ID)
 
         for i in range(3):
-            edit_image_request(
-                requests=requests, slide=slide_ids[i], image_url=f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{master_dict[game]['PLAYERS'][i].person_id}.png", image_id=f"Image {i}")
+            slide_requests = edit_image_request(
+                requests=slide_requests, slide=slide_ids[i], image_url=f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{master_dict[game]['PLAYERS'][i].person_id}.png", image_id="MyImage_" + str(i))
 
         progress_bar.set_description(f"{game_number} Updating Date text")
-        slide_requests = edit_text_request(slide_requests, '{{MATCH}}',
+        slide_requests = edit_text_request(slide_requests, '{MATCH}',
                                            master_dict[game]['SLIDE_MATCHUP'])
         progress_bar.update(1)
 
@@ -175,7 +176,6 @@ def create_request(master_dict, game_ids, game_dict):
         game_count += 1
         progress_bar.set_description(f"{game_number} COMPLETE")
         progress_bar.close()
-        time.sleep(10)
 
 
 def get_special_keys(value, progress_bar, game_number, requests, key_array, iterations):
@@ -188,7 +188,6 @@ def get_special_keys(value, progress_bar, game_number, requests, key_array, iter
             requests = edit_text_request(
                 requests, replacement_key, replacement_text)
             progress_bar.update(1)
-            time.sleep(0.05)
 
     return requests
 
