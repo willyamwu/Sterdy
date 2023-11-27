@@ -26,24 +26,27 @@ GOOGLE_CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 
 # X Authentication
 auth = tweepy.OAuthHandler(TWITTER_API_KEY, TWITTER_API_KEY_SECRET)
-auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET )
+auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 client = tweepy.Client(
     consumer_key=TWITTER_API_KEY,
     consumer_secret=TWITTER_API_KEY_SECRET,
     access_token=TWITTER_ACCESS_TOKEN,
-    access_token_secret=TWITTER_ACCESS_TOKEN_SECRET 
+    access_token_secret=TWITTER_ACCESS_TOKEN_SECRET
 )
 
 
 current_date = datetime.now()   # Get the current date and time
-current_date_string = current_date.strftime('%Y-%m-%d')    # Format the current date as a string
+current_date_string = current_date.strftime(
+    '%Y-%m-%d')    # Format the current date as a string
 
-yesterday_date = current_date - timedelta(days=1)   # Calculate yesterday's date
-yesterday_date_string = yesterday_date.strftime('%m/%d/%Y')    # Format yesterday's date as a string
+yesterday_date = current_date - \
+    timedelta(days=1)   # Calculate yesterday's date
+yesterday_date_string = yesterday_date.strftime(
+    '%m/%d/%Y')    # Format yesterday's date as a string
 
-# yesterday_date_string = '6/1/2023'
+# yesterday_date_string = current_date.strftime('%m/%d/%Y')
 
 # NBA Team Social Media Handles
 nba_teams_social_media = {
