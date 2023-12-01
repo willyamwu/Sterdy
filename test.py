@@ -13,6 +13,29 @@ from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, PlayerGameLog, CommonPlayerInfo, BoxScoreSummaryV2, BoxScoreDefensiveV2, LeagueLeaders, PlayByPlayV3, BoxScoreAdvancedV3, WinProbabilityPBP
 from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
+from nba_api.stats.endpoints import PlayByPlayV3
+
+# Specify the game ID for the desired game
+game_id = '0022300267'  # Replace this with the actual game ID
+
+plays = PlayByPlayV3(game_id).get_data_frames()[0]
+
+
+field_goals = [row for index,
+               row in plays.iterrows() if row['personId'] == 1630169 if row['actionType'] == "Made Shot"]
+
+for item in field_goals:
+    print(item["description"].split(
+        "(", 1)[0].strip().replace("Haliburton", "").strip())
+
+# field_goals = [row for index,
+#                row in plays.iterrows()]
+
+# for index, row in plays.iterrows():
+#     print(row["personId"])
+
+
+# print(field_goals)
 
 
 # page_elements = slide.get('pageElements')
@@ -199,26 +222,6 @@ from datetime import datetime, timedelta
 # plot_shot_chart(player_id, season, game_id, team_id)
 
 
-# from nba_api.stats.endpoints import playbyplay, PlayByPlayV3
-
-# # Specify the game ID for the desired game
-# game_id = '0011900001'  # Replace this with the actual game ID
-
-# plays = PlayByPlayV3(game_id).get_data_frames()[0]
-
-
-# field_goals = [row for index,
-#                row in plays.iterrows()]
-
-# print(field_goals)
-
-# # Fetch the play-by-play data for the specified game
-# pbp = playbyplay.PlayByPlay(game_id)
-
-# # Get the play data
-# plays = pbp.get_normalized_dict()['PlayByPlay']
-
-
 # # Filter out plays that are not field goals
 # field_goals = [play for play in plays if play['EVENTMSGTYPE'] == 1]
 
@@ -233,36 +236,6 @@ from datetime import datetime, timedelta
 # for i, play in enumerate(top_5_plays, start=1):
 #     print(
 #         f"Top Play {i}: {play['HOMEDESCRIPTION']} vs {play['VISITORDESCRIPTION']}")
-
-
-# Get all active NBA players
-nba_players = players.get_players()
-
-# Find Stephen Curry in the list
-stephen_curry = [
-    player for player in nba_players if player['full_name'] == 'Damian Lillard']
-
-# Print the player ID if found
-if stephen_curry:
-    player_id = stephen_curry[0]['id']
-    print(f"Stephen Curry's player ID is: {player_id}")
-else:
-    print("Stephen Curry not found in the list of NBA players.")
-
-
-# Get all NBA teams
-nba_teams = teams.get_teams()
-
-# Find the Atlanta Hawks
-atlanta_hawks = [
-    team for team in nba_teams if team['full_name'] == 'Atlanta Hawks']
-
-# Print the team ID if found
-if atlanta_hawks:
-    team_id = atlanta_hawks[0]['id']
-    print("Atlanta Hawks Team ID:", team_id)
-else:
-    print("Atlanta Hawks not found in the NBA teams list.")
 
 
 # my_string_without_spaces = my_string.replace(' ', '')

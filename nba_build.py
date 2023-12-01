@@ -61,71 +61,7 @@ GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
 
-# # page_elements = slide.get('pageElements')
-
-# # def get_slide_id(id):
-# presentation = slides_service.presentations().get(
-#     presentationId=PRESENTATION_ID).execute()
-
-# slides_data = presentation.get('slides', [])
-# slide_ids = []
-# for slide in slides_data:
-#     slide_id = slide['objectId']
-#     slide_ids.append(slide_id)
-
-# slide = slide_ids[2]
-# print(slide)
-
-
-# IMAGE_URL = (
-#     "https://cdn.nba.com/logos/nba/1610612737/primary/L/logo.svg"
-# )
-
-# print("hi")
-# # The image URL.
-# IMAGE_URL = 'https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/203507.png'
-
-
-# requests = []
-# image_id = "MyImage_11"
-# emu4M = {"magnitude": 4000000, "unit": "EMU"}
-# requests.append(
-#     {
-#         "createImage": {
-#             "objectId": image_id,
-#             "url": IMAGE_URL,
-#             "elementProperties": {
-#                 "pageObjectId": slide,
-#                 "size": {"height": emu4M, "width": emu4M},
-#                 "transform": {
-#                     "scaleX": 1.5,
-#                     "scaleY": 1.5,
-#                     "translateX": 3620064,
-#                     "translateY": 2056656,
-#                     "unit": "EMU",
-#                 },
-#             },
-#         }
-#     }
-# )
-
-# # Execute the request.
-# body = {"requests": requests}
-# response = (
-#     slides_service.presentations()
-#     .batchUpdate(presentationId=PRESENTATION_ID, body=body)
-#     .execute()
-# )
-# create_image_response = response.get("replies")[0].get("createImage")
-# print(f"Created image with ID: {(create_image_response.get('objectId'))}")
-
-
-# quit()
-
-
 def create_request(master_dict, game_ids):
-    # key_array = ['NAME', 'RATING', 'PTS', 'REB', 'AST', 'DEF', 'TEAM']
-
     game_count = 1
     total_games = len(game_ids)
 
@@ -147,15 +83,15 @@ def create_request(master_dict, game_ids):
                 requests=slide_requests, slide=slide_ids[i], image_url=f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{master_dict[game]['PLAYERS'][i].person_id}.png", image_id="MyImage_" + str(i))
 
         progress_bar.set_description(f"{game_number} Updating Date text")
-        slide_requests = edit_text_request(slide_requests, '{MATCH}',
-                                           master_dict[game]['SLIDE_MATCHUP'])
+        slide_requests = edit_text_request(slide_requests, '{MATCH}', master_dict[game]['SLIDE_MATCHUP'])
         progress_bar.update(1)
 
         progress_bar.set_description(f"{game_number} Updating Matchup text")
-        slide_requests = edit_text_request(
-            slide_requests, '{DATE}', CONSTANTS.yesterday_date_string)
-
+        slide_requests = edit_text_request(slide_requests, '{DATE}', CONSTANTS.yesterday_date_string)
         progress_bar.update(1)
+
+        for i in range(3):
+            slide_requests = edit_text_request(requests=slide_requests, replacement_key="{CP" + str(i+1) + "}", replacement_text=master_dict[game]["PLAYERS"][i].get_complete_plays())
 
         slide_requests = get_special_keys(value=master_dict[game]["TEAMS"],
                                           progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=team_key_array, iterations=2)

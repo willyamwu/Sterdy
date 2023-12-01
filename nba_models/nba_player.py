@@ -1,3 +1,6 @@
+from nba_api.stats.endpoints import PlayByPlayV3
+
+
 class NBA_Player:
     def __init__(self, row) -> None:
         self.data = row
@@ -83,3 +86,26 @@ class NBA_Player:
             self.letter_grade = "C-"
         else:
             self.letter_grade = "D"
+
+    def get_complete_plays(self):
+        plays = PlayByPlayV3(self.data["gameId"]).get_data_frames()[0]
+
+        field_goals = [row for index,
+                       row in plays.iterrows() if row['personId'] == self.person_id if row['actionType'] == "Made Shot"]
+
+        self.complete_plays = "| "
+        for item in field_goals:
+            original_string = item["description"].replace(self.last_name, "").split("(", 1)[0].strip()
+
+            # # Find the index of the first opening parenthesis
+            # first_open_paren_index = original_string.find("(")
+
+            # # Find the index of the second opening parenthesis
+            # second_open_paren_index = original_string.find("(", first_open_paren_index + 1)
+
+            # if second_open_paren_index > 0:
+            #     self.complete_plays += original_string[:second_open_paren_index] + " | "
+            
+            self.complete_plays += original_string + " | "
+        
+        return self.complete_plays
