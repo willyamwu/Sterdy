@@ -96,15 +96,6 @@ class NBA_Player:
         self.complete_plays = "| "
         for item in field_goals:
             original_string = item["description"].replace(self.last_name, "").split("(", 1)[0].strip()
-
-            # # Find the index of the first opening parenthesis
-            # first_open_paren_index = original_string.find("(")
-
-            # # Find the index of the second opening parenthesis
-            # second_open_paren_index = original_string.find("(", first_open_paren_index + 1)
-
-            # if second_open_paren_index > 0:
-            #     self.complete_plays += original_string[:second_open_paren_index] + " | "
             
             self.complete_plays += original_string + " | "
         

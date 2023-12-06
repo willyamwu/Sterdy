@@ -15,18 +15,45 @@ from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
 from nba_api.stats.endpoints import PlayByPlayV3
 
-# Specify the game ID for the desired game
-game_id = '0022300267'  # Replace this with the actual game ID
+import matplotlib.pyplot as plt
+import seaborn as sns
+from nba_api.stats.endpoints import shotchartdetail
 
-plays = PlayByPlayV3(game_id).get_data_frames()[0]
+def get_shot_data(game_id):
+    shot_chart = shotchartdetail.ShotChartDetail(
+        team_id=0,
+        player_id=0,
+        game_id_nullable=game_id,
+        context_measure_simple='FGA'
+    )
+    shot_data = shot_chart.get_data_frames()[0]
+    return shot_data
+
+def create_heatmap(shot_data):
+    plt.figure(figsize=(12, 11))
+    sns.kdeplot(
+        x=shot_data.LOC_X,
+        y=shot_data.LOC_Y,
+        cmap='YlOrRd',
+        fill=True,  # Use fill instead of shade
+        thresh=0,   # Adjust this value as needed
+    )
+    plt.xlim(-300, 300)
+    plt.ylim(0, 564)
+    plt.title('NBA Game Shot Chart Heatmap')
+    plt.show()
+
+def main():
+    # Replace '0022000001' with the desired NBA game ID
+    game_id = '0022300280'
+    
+    shot_data = get_shot_data(game_id)
+    create_heatmap(shot_data)
+
+if __name__ == "__main__":
+    main()
 
 
-field_goals = [row for index,
-               row in plays.iterrows() if row['personId'] == 1630169 if row['actionType'] == "Made Shot"]
-
-for item in field_goals:
-    print(item["description"].split(
-        "(", 1)[0].strip().replace("Haliburton", "").strip())
 
 # field_goals = [row for index,
 #                row in plays.iterrows()]
