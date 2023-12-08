@@ -95,8 +95,9 @@ class NBA_Player:
 
         self.complete_plays = "| "
         for item in field_goals:
-            original_string = item["description"].replace(self.last_name, "").split("(", 1)[0].strip()
-            
+            original_string = item["description"].replace(
+                self.last_name, "").split("(", 1)[0].strip()
+
             self.complete_plays += original_string + " | "
-        
+
         return self.complete_plays

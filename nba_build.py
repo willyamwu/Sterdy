@@ -129,24 +129,6 @@ def get_special_keys(value, progress_bar, game_number, requests, key_array, iter
     return requests
 
 
-# def get_team_keys(value, progress_bar, game_number, requests):
-#     team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
-#                       '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
-
-#     for i in range(2):
-#         for j in range(len(team_key_array)):
-#             replacement_key = team_key_array[j] + str(i+1) + '}'
-#             progress_bar.set_description(
-#                 f"{game_number} Modifying Team {i} {replacement_key}")
-#             replacement_text = f"{value[i].team_stats_array[j]}"
-#             requests = edit_text_request(
-#                 requests, replacement_key, replacement_text)
-#             progress_bar.update(1)
-#             time.sleep(0.05)
-
-#     return requests
-
-
 def get_slide_id(id):
     presentation = slides_service.presentations().get(presentationId=id).execute()
 
