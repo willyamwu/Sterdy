@@ -40,8 +40,8 @@ class NBA_Player:
             self.plus_minus
         )
 
-        self.average_shooting_percentage = (
-            self.fg_pct * 2 + self.fg_3_pct * 3 + self.ft_pct) / 6
+        total_possible_points = 3 * self.fg_3_m + 2 * self.fga + self.ftm
+        self.average_shooting_percentage = self.pts / total_possible_points
         performance_rating *= (1 + self.average_shooting_percentage)
 
         self.rating = round(performance_rating, 2)
