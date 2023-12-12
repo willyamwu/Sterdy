@@ -41,8 +41,11 @@ class NBA_Player:
         )
 
         total_possible_points = 3 * self.fg_3_m + 2 * self.fga + self.ftm
-        self.average_shooting_percentage = self.pts / total_possible_points
-        performance_rating *= (1 + self.average_shooting_percentage)
+        if total_possible_points > 0:
+            self.average_shooting_percentage = self.pts / total_possible_points
+            performance_rating *= (1 + self.average_shooting_percentage)
+        else:
+            self.average_shooting_percentage = 0
 
         self.rating = round(performance_rating, 2)
 
