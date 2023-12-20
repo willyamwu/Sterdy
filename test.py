@@ -1,3 +1,5 @@
+import time
+from turtle import home
 from nba_api.stats.static import teams
 import json
 import math
@@ -14,45 +16,237 @@ from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, Pla
 from nba_api.stats.endpoints import TeamDashboardByGeneralSplits
 from datetime import datetime, timedelta
 from nba_api.stats.endpoints import PlayByPlayV3
+import matplotlib.pyplot as plt
+import re
+from datetime import datetime, timedelta
+
+def convert_clock_to_time(clock, quarter):
+    # Extract minutes, seconds, and tenths of a second using regular expressions
+    match = re.match(r'PT(\d{2})M(\d{2}\.\d{2})S', clock)
+    if match:
+        minutes, seconds_with_tenths = match.groups()
+        # Split seconds and tenths of a second
+        seconds, tenths = map(int, seconds_with_tenths.split('.'))
+        # Calculate total seconds including tenths
+        total_seconds = 720 -(int(minutes) * 60 + seconds) + (quarter - 1) * 720
+        return total_seconds
+        # Convert to timedelta
+        delta = timedelta(seconds=total_seconds)
+        # Create a datetime object with a reference date (midnight)
+        reference_date = datetime(1900, 1, 1)
+        result_time = reference_date + delta
+        return result_time.time()
+    else:
+        return None
+
+
+play = PlayByPlayV3(end_period=0, game_id='0022300354', start_period=0).get_data_frames()[0]
+# print(play)
+
+times = []
+away_score = []
+home_score = []
+difference = []
+
+for index, row in play.iterrows():
+    if row['shotResult'] == 'Made':
+        times.append(convert_clock_to_time(row['clock'], row['period']))
+        away_score.append(int(row['scoreAway']))
+        home_score.append(int(row['scoreHome']))
+        difference.append(int(row['scoreHome']) - int(row['scoreAway']))
+
+        # print(row)
+
+
+plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.autolayout"] = True
+
+print(times)
+print(away_score)
+times = np.array(times)
+difference = np.array(difference)
+away_score = np.array(away_score)
+home_score = np.array(home_score)
+y2 = 0
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(times, difference, drawstyle="steps-pre")
+ax.fill_between(times, difference, where=(difference >=0), step="pre", color='green', alpha=0.3)
+ax.fill_between(times, difference, where=(difference <= 0), step="pre", color='red', alpha=0.3)
+
+ax.plot(times, away_score, drawstyle="steps-pre")
+ax.plot(times, home_score, drawstyle="steps-pre")
+
+ax.fill_between(times, home_score, away_score, where=(home_score >= away_score), step='pre', color='green', alpha=0.3)
+ax.fill_between(times, home_score, away_score, where=(home_score <= away_score), step='pre', color='red', alpha=0.3)
+
+
+# Use fill_between to create a filled area plot
+
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+
+# Use step to create a staircase plot with filled areas
+# ax.step(times, home_score, label='Home Team', where='post', linewidth=2)
+# ax.step(times, away_score, label='Away Team', where='post', linewidth=2)
+# ax.step(times, difference, label='Lead Tracker', drawstyle="steps", linewidth=2)
+
+
+y2 = 0
+
+# plt.fill_between(times, difference, y2, where=(difference >= y2), step='pre', interpolate=True, color='green', alpha=0.3, label='Fill between y=0 and y1')
+# plt.fill_between(times, difference, y2, where=(difference <= y2), step='pre', interpolate=True, color='red', alpha=0.3, label='Fill between y=0 and y1')
+
+# plt.plot(times, difference, drawstyle="steps-pre")
+
+# plt.plot(times, home_score, drawstyle="steps-pre")
+# plt.plot(times, away_score, drawstyle="steps-pre")
+
+# plt.fill_between(times, home_score, away_score, where=(home_score >= away_score), step='pre', interpolate=True, color='green', alpha=0.3, label='Fill between y=0 and y1')
+# plt.fill_between(times, away_score, home_score, where=(home_score <= away_score), step='pre', interpolate=True, color='red', alpha=0.3, label='Fill between y=0 and y1')
+
+
+
+# plt.fill_between(time, difference, y2, where=(y1 >= y2), interpolate=True, color='green', alpha=0.3, label='Fill between y=0 and y1')
+
+
+# ax.fill_between(time, home_score, home_score, color='gray', alpha=0.3, label='Shaded Area')
+
+# # Fill between the steps
+# ax.fill_between(times, home_score, step='post', alpha=0.5)
+# ax.fill_between(times, away_score, step='post', alpha=0.5)
+
+
+# plt.step(times, home_score, label='Home Team', where='post')
+# plt.step(times, away_score, label='Away Team', where='post')
+
+
+# plt.xlabel('Time (seconds)')
+# plt.ylabel('Score')
+plt.title('NBA Teams Scores Over Time')
+
+
+
+# Add legend
+plt.legend()
+
+# Show the plot
+plt.show()
+
 
 import matplotlib.pyplot as plt
-import seaborn as sns
-from nba_api.stats.endpoints import shotchartdetail
+import numpy as np
 
-def get_shot_data(game_id):
-    shot_chart = shotchartdetail.ShotChartDetail(
-        team_id=0,
-        player_id=0,
-        game_id_nullable=game_id,
-        context_measure_simple='FGA'
-    )
-    shot_data = shot_chart.get_data_frames()[0]
-    return shot_data
+x = np.linspace(0,50,35)
+y = np.random.exponential(1, len(x))
+y2 = np.random.exponential(1, len(x))
 
-def create_heatmap(shot_data):
-    plt.figure(figsize=(12, 11))
-    sns.kdeplot(
-        x=shot_data.LOC_X,
-        y=shot_data.LOC_Y,
-        cmap='YlOrRd',
-        fill=True,  # Use fill instead of shade
-        thresh=0,   # Adjust this value as needed
-    )
-    plt.xlim(-300, 300)
-    plt.ylim(0, 564)
-    plt.title('NBA Game Shot Chart Heatmap')
-    plt.show()
+plt.fill_between(x,y, step="pre", alpha=0.4)
+plt.fill_between(x,y2, step="pre", alpha=0.4)
 
-def main():
-    # Replace '0022000001' with the desired NBA game ID
-    game_id = '0022300280'
+plt.plot(x,y, drawstyle="steps")
+plt.plot(x,y2, drawstyle="steps")
+
+plt.show()
+
+# import pandas as pd
+# import matplotlib.pyplot as plt
+
+# # Use an example game_id, you'll need to replace this with the game you are interested in
+# game_id = '0022300354' # Format: '00221' + game number (last 5 digits)
+
+# # Instantiate the play by play endpoint
+# pbp = PlayByPlayV3(game_id=game_id)
+
+# # Get the DataFrame
+# pbp_df = pbp.get_data_frames()[0]
+
+# # Filter out rows where 'SCORE' column is NaN as these don't represent scoring plays
+# pbp_df = pbp_df[pbp_df['shotResult'] != 'Missed'].dropna()
+
+# # Split the 'SCORE' column into two separate columns for home and visitor scores
+# pbp_df[['scoreHome', 'scoreAway']] = pbp_df['SCORE'].str.split(' - ', expand=True)
+# pbp_df['scoreHome'] = pd.to_numeric(pbp_df['scoreHome'])
+# pbp_df['scoreAway'] = pd.to_numeric(pbp_df['scoreAway'])
+
+# # Convert 'PCTIMESTRING' to a timedelta object and then to seconds
+# # This will be used to plot the scores against the game clock
+# pbp_df['SECONDS'] = pd.to_timedelta('00:' + pbp_df['PCTIMESTRING']).dt.total_seconds()
+# pbp_df['SECONDS_REMAINING'] = (48*60) - (pbp_df['PERIOD']-1)*12*60 - pbp_df['SECONDS']
+
+# # Plot the scores
+# plt.figure(figsize=(14, 7))
+# plt.plot(pbp_df['SECONDS_REMAINING'], pbp_df['HOME_SCORE'], label='Home Team')
+# plt.plot(pbp_df['SECONDS_REMAINING'], pbp_df['VISITOR_SCORE'], label='Visitor Team')
+
+# # Reverse the x-axis to show time elapsing from left to right
+# plt.gca().invert_xaxis()
+
+# plt.xlabel('Time Remaining (seconds)')
+# plt.ylabel('Score')
+# plt.title(f'Score Over Time for Game ID {game_id}')
+# plt.legend()
+# plt.show()
+
+
+# for i in range(len(play)):
+#     if play.loc['isFieldGoal'] == 1:
+#         print(play.iloc[i])
+
+# play = BoxScoreAdvancedV3(end_period=0, game_id='0022300104', start_period=0).get_data_frames()[0]
+
+# for i in range(len(play)):
+#     print(play.iloc[i])
+
+# play = WinProbabilityPBP(game_id='0022300354').get_data_frames()[0]
+
+# for i in range(len(play)):
+#     p = play.iloc[i]
+#     if p['DESCRIPTION'] and p['HOME_PCT']:
+#         print(p)
+
+
+
+
+
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# from nba_api.stats.endpoints import shotchartdetail
+
+# def get_shot_data(game_id):
+#     shot_chart = shotchartdetail.ShotChartDetail(
+#         team_id=0,
+#         player_id=0,
+#         game_id_nullable=game_id,
+#         context_measure_simple='FGA'
+#     )
+#     shot_data = shot_chart.get_data_frames()[0]
+#     return shot_data
+
+# def create_heatmap(shot_data):
+#     plt.figure(figsize=(12, 11))
+#     sns.kdeplot(
+#         x=shot_data.LOC_X,
+#         y=shot_data.LOC_Y,
+#         cmap='YlOrRd',
+#         fill=True,  # Use fill instead of shade
+#         thresh=0,   # Adjust this value as needed
+#     )
+#     plt.xlim(-300, 300)
+#     plt.ylim(0, 564)
+#     plt.title('NBA Game Shot Chart Heatmap')
+#     plt.show()
+
+# def main():
+#     # Replace '0022000001' with the desired NBA game ID
+#     game_id = '0022300280'
     
-    shot_data = get_shot_data(game_id)
-    create_heatmap(shot_data)
+#     shot_data = get_shot_data(game_id)
+#     create_heatmap(shot_data)
 
-if __name__ == "__main__":
-    main()
-
+# if __name__ == "__main__":
+#     main()
 
 
 # field_goals = [row for index,
@@ -351,20 +545,7 @@ if __name__ == "__main__":
 
 # game_id = unique_game_ids[0]
 
-# # play = PlayByPlayV3(end_period=0, game_id='0022300104', start_period=0).get_data_frames()[0]
-# # print(play)
 
-# # play = BoxScoreAdvancedV3(end_period=0, game_id='0022300104', start_period=0).get_data_frames()[0]
-
-# # for i in range(len(play)):
-# #     print(play.iloc[i])
-
-# play = WinProbabilityPBP(game_id='0022300138').get_data_frames()[0]
-
-# for i in range(len(play)):
-#     p = play.iloc[i]
-#     if p['DESCRIPTION'] and p['HOME_PCT']:
-#         print(p)
 
 
 # print(game_id)
