@@ -1,3 +1,4 @@
+from cProfile import label
 import time
 from turtle import home
 from nba_api.stats.static import teams
@@ -19,6 +20,8 @@ from nba_api.stats.endpoints import PlayByPlayV3
 import matplotlib.pyplot as plt
 import re
 from datetime import datetime, timedelta
+import seaborn as sns
+
 
 def convert_clock_to_time(clock, quarter):
     # Extract minutes, seconds, and tenths of a second using regular expressions
@@ -28,25 +31,28 @@ def convert_clock_to_time(clock, quarter):
         # Split seconds and tenths of a second
         seconds, tenths = map(int, seconds_with_tenths.split('.'))
         # Calculate total seconds including tenths
-        total_seconds = 720 -(int(minutes) * 60 + seconds) + (quarter - 1) * 720
+        total_seconds = 720 - (int(minutes) * 60 +
+                               seconds) + (quarter - 1) * 720
         return total_seconds
-        # Convert to timedelta
-        delta = timedelta(seconds=total_seconds)
-        # Create a datetime object with a reference date (midnight)
-        reference_date = datetime(1900, 1, 1)
-        result_time = reference_date + delta
-        return result_time.time()
+        # # Convert to timedelta
+        # delta = timedelta(seconds=total_seconds)
+        # # Create a datetime object with a reference date (midnight)
+        # reference_date = datetime(1900, 1, 1)
+        # result_time = reference_date + delta
+        # return result_time.time()
     else:
         return None
 
 
-play = PlayByPlayV3(end_period=0, game_id='0022300354', start_period=0).get_data_frames()[0]
+play = PlayByPlayV3(end_period=0, game_id='0022300382',
+                    start_period=0).get_data_frames()[0]
 # print(play)
 
 times = []
 away_score = []
 home_score = []
 difference = []
+
 
 for index, row in play.iterrows():
     if row['shotResult'] == 'Made':
@@ -55,45 +61,140 @@ for index, row in play.iterrows():
         home_score.append(int(row['scoreHome']))
         difference.append(int(row['scoreHome']) - int(row['scoreAway']))
 
-        # print(row)
+        # if times[-1] < 720:
+        #     print(row)
 
-
-plt.rcParams["figure.figsize"] = [7.50, 3.50]
-plt.rcParams["figure.autolayout"] = True
-
-print(times)
-print(away_score)
 times = np.array(times)
 difference = np.array(difference)
 away_score = np.array(away_score)
 home_score = np.array(home_score)
+
+
+
+
+
+sns.set(style="whitegrid")
+
+
+plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.autolayout"] = True
+plt.rcParams['font.family'] = 'monospace'  # Choose your desired font family
+
 y2 = 0
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.plot(times, difference, drawstyle="steps-pre")
-ax.fill_between(times, difference, where=(difference >=0), step="pre", color='green', alpha=0.3)
-ax.fill_between(times, difference, where=(difference <= 0), step="pre", color='red', alpha=0.3)
+# ax.plot(times, difference, drawstyle="steps-pre")
+# ax.fill_between(times, difference, where=(difference >=0), step="pre", color='green', alpha=0.3)
+# ax.fill_between(times, difference, where=(difference <= 0), step="pre", color='red', alpha=0.3)
 
-ax.plot(times, away_score, drawstyle="steps-pre")
-ax.plot(times, home_score, drawstyle="steps-pre")
-
-ax.fill_between(times, home_score, away_score, where=(home_score >= away_score), step='pre', color='green', alpha=0.3)
-ax.fill_between(times, home_score, away_score, where=(home_score <= away_score), step='pre', color='red', alpha=0.3)
+print(len(times))
+print(len(away_score))
+print(len(home_score))
 
 
-# Use fill_between to create a filled area plot
+for i in range(len(times)):
+    awayScore = away_score[i]
+    homeScore = home_score[i]
+    timez = times[i]
+    # print(awayScore)
+    if i > 0 and homeScore > away_score[i-1] and homeScore < awayScore:
+        # print("curr")
+        # print(f"{home_score[i-1]}:")
+        # print(away_score[i-1])
+        # print(times[i-1])
+        # print("next")
+        # print(f"{homeScore}:")
+        # print(awayScore)
+        # print(timez)
+        # print("")
+        # print(home_score[i+1])
+        # print(away_score[i+1])
+        # print(times[i+1])
+        # print("")
+        time_temp = [times[i-1], times[i]]
+        home_score_temp = np.array([home_score[i], home_score[i]])
+        away_score_temp =np.array([away_score[i], away_score[i]])
+
+        print(time_temp)
+        print(home_score_temp)
+        print(away_score_temp)
+
+        ax.fill_between(time_temp, away_score_temp, home_score_temp, where=(
+    away_score_temp >= home_score_temp), step='pre', color='blue', alpha=0.3)
+    if i > 0 and awayScore > home_score[i-1] and homeScore > awayScore:
+        print(f"{home_score[i-1]}:")
+        print(away_score[i-1])
+        print("kmcdsklmc")
+        print(f"{homeScore}:")
+        print(awayScore)
+
+        time_temp = [times[i-1], times[i]]
+        home_score_temp = np.array([home_score[i], home_score[i]])
+        away_score_temp =np.array([away_score[i], away_score[i]])
+
+        print(time_temp)
+        print(home_score_temp)
+        print(away_score_temp)
+
+        ax.fill_between(time_temp, away_score_temp, home_score_temp, where=(
+    away_score_temp <= home_score_temp), step='pre', color='purple', alpha=0.3)
+
+
+ax.plot(times, away_score, drawstyle="steps", label="Kings")
+ax.plot(times, home_score, drawstyle="steps", label="Grizzlies")
+
+ax.fill_between(times, home_score, away_score, where=(
+    home_score <= away_score), step='pre', color='green', alpha=0.3)
+ax.fill_between(times, home_score, away_score, where=(
+    home_score >= away_score), step='pre', color='red', alpha=0.3)
+
+plt.xlim([0, max(times)])
+if away_score[-1] > home_score[-1]:
+    plt.ylim([0, away_score[-1] + 5])
+else:
+    plt.ylim([0, home_score[-1] + 5])
+
+
+ax.tick_params(axis='y', direction='out', length=6,
+               width=2, colors='black', grid_alpha=0.5)
+ax.yaxis.grid(True, linestyle='--', linewidth=1)
+
+ax.scatter(720, 18, color='red', zorder=5)
+ax.annotate('100', (720, 18), textcoords="offset points",
+            xytext=(15, -10), ha='center', fontsize=10)
+
+ax.scatter(290, 10, color='red', zorder=5)
+
+
 
 plt.gca().spines['top'].set_visible(False)
 plt.gca().spines['right'].set_visible(False)
+plt.gca().spines['left'].set_visible(False)
+plt.gca().spines['bottom'].set_visible(False)
+sns.despine(left=True)
+sns.despine(bottom=True)
+
+
+plt.title('Grizzlies v. Kings')
+
+custom_xticks = [0, 720, 1440, 2160, 2880]  # Example custom tick positions
+custom_labels = ['0','EO-Q1', 'EO-Q2', 'EO-Q3', 'EO-Q4']  # Example custom tick labels
+ax.set_xticks(custom_xticks)
+ax.set_xticklabels(custom_labels)
+
+# Add legend
+plt.legend()
+
+# Show the plot
+plt.show()
+
 
 # Use step to create a staircase plot with filled areas
 # ax.step(times, home_score, label='Home Team', where='post', linewidth=2)
 # ax.step(times, away_score, label='Away Team', where='post', linewidth=2)
 # ax.step(times, difference, label='Lead Tracker', drawstyle="steps", linewidth=2)
 
-
-y2 = 0
 
 # plt.fill_between(times, difference, y2, where=(difference >= y2), step='pre', interpolate=True, color='green', alpha=0.3, label='Fill between y=0 and y1')
 # plt.fill_between(times, difference, y2, where=(difference <= y2), step='pre', interpolate=True, color='red', alpha=0.3, label='Fill between y=0 and y1')
@@ -105,7 +206,6 @@ y2 = 0
 
 # plt.fill_between(times, home_score, away_score, where=(home_score >= away_score), step='pre', interpolate=True, color='green', alpha=0.3, label='Fill between y=0 and y1')
 # plt.fill_between(times, away_score, home_score, where=(home_score <= away_score), step='pre', interpolate=True, color='red', alpha=0.3, label='Fill between y=0 and y1')
-
 
 
 # plt.fill_between(time, difference, y2, where=(y1 >= y2), interpolate=True, color='green', alpha=0.3, label='Fill between y=0 and y1')
@@ -124,31 +224,22 @@ y2 = 0
 
 # plt.xlabel('Time (seconds)')
 # plt.ylabel('Score')
-plt.title('NBA Teams Scores Over Time')
 
 
+# import matplotlib.pyplot as plt
+# import numpy as np
 
-# Add legend
-plt.legend()
+# x = np.linspace(0,50,35)
+# y = np.random.exponential(1, len(x))
+# y2 = np.random.exponential(1, len(x))
 
-# Show the plot
-plt.show()
+# plt.fill_between(x,y, step="pre", alpha=0.4)
+# plt.fill_between(x,y2, step="pre", alpha=0.4)
 
+# plt.plot(x,y, drawstyle="steps")
+# plt.plot(x,y2, drawstyle="steps")
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-x = np.linspace(0,50,35)
-y = np.random.exponential(1, len(x))
-y2 = np.random.exponential(1, len(x))
-
-plt.fill_between(x,y, step="pre", alpha=0.4)
-plt.fill_between(x,y2, step="pre", alpha=0.4)
-
-plt.plot(x,y, drawstyle="steps")
-plt.plot(x,y2, drawstyle="steps")
-
-plt.show()
+# plt.show()
 
 # import pandas as pd
 # import matplotlib.pyplot as plt
@@ -207,9 +298,6 @@ plt.show()
 #         print(p)
 
 
-
-
-
 # import matplotlib.pyplot as plt
 # import seaborn as sns
 # from nba_api.stats.endpoints import shotchartdetail
@@ -241,7 +329,7 @@ plt.show()
 # def main():
 #     # Replace '0022000001' with the desired NBA game ID
 #     game_id = '0022300280'
-    
+
 #     shot_data = get_shot_data(game_id)
 #     create_heatmap(shot_data)
 
@@ -544,8 +632,6 @@ plt.show()
 
 
 # game_id = unique_game_ids[0]
-
-
 
 
 # print(game_id)

@@ -50,7 +50,7 @@ class NBA_Player:
         self.rating = round(performance_rating, 2)
 
     def player_of_the_match(self):
-        text = f"\nPOTG: 🔥{self.full_name.upper()}🔥 ({self.team_tricode})\n"
+        text = f"\nPOTG: 🔥#{self.full_name}🔥 ({self.team_tricode})\n"
         text += f"{self.rating} RATING\n"
 
         if self.pts > 0:
