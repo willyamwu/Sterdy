@@ -16,6 +16,8 @@ from io import BytesIO
 import time
 from tqdm import tqdm
 
+# from nba_build_team import create_team_request
+
 CLIENT_FILE = 'client_secret.json'
 CLIENT_ID = CONSTANTS.GOOGLE_CLIENT_ID
 CLIENT_SECRET = CONSTANTS.GOOGLE_CLIENT_SECRET
@@ -61,6 +63,9 @@ GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
 
+def intialize(master_dict, game_ids):
+    create_team_request(drive_service, slides_service, master_dict, game_ids)
+
 def create_request(master_dict, game_ids):
     game_count = 1
     total_games = len(game_ids)
@@ -73,28 +78,28 @@ def create_request(master_dict, game_ids):
 
         progress_bar.set_description(
             f"{game_number} Creating a Copy of the Slide")
-        PRESENTATION_COPY_ID = copy_slide()
+        PRESENTATION_COPY_ID = copy_slide(PRESENTATION_ID)
         progress_bar.update(1)
 
-        slide_ids = get_slide_id(PRESENTATION_ID)
+        slide_ids = get_slide_id(PRESENTATION_COPY_ID)
 
         for i in range(3):
             slide_requests = edit_image_request(
                 requests=slide_requests, slide=slide_ids[i], image_url=f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{master_dict[game]['PLAYERS'][i].person_id}.png", image_id="MyImage_" + str(i))
 
-        progress_bar.set_description(f"{game_number} Updating Date text")
+        progress_bar.set_description(f"{game_number} Updating Matchup text")
         slide_requests = edit_text_request(slide_requests, '{MATCH}', master_dict[game]['SLIDE_MATCHUP'])
         progress_bar.update(1)
 
-        progress_bar.set_description(f"{game_number} Updating Matchup text")
+        progress_bar.set_description(f"{game_number} Updating Date text")
         slide_requests = edit_text_request(slide_requests, '{DATE}', CONSTANTS.yesterday_date_string)
         progress_bar.update(1)
 
         for i in range(3):
             slide_requests = edit_text_request(requests=slide_requests, replacement_key="{CP" + str(i+1) + "}", replacement_text=master_dict[game]["PLAYERS"][i].get_complete_plays())
 
-        slide_requests = get_special_keys(value=master_dict[game]["TEAMS"],
-                                          progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=team_key_array, iterations=2)
+        # slide_requests = get_special_keys(value=master_dict[game]["TEAMS"],
+        #                                   progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=team_key_array, iterations=2)
 
         slide_requests = get_special_keys(value=master_dict[game]["PLAYERS"],
                                           progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=player_key_array, iterations=10)
@@ -103,7 +108,7 @@ def create_request(master_dict, game_ids):
             presentationId=PRESENTATION_COPY_ID, body={'requests': slide_requests}).execute()
 
         progress_bar.set_description(f"{game_number} Downloading Images")
-        get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID)
+        get_images(PRESENTATION_COPY_ID=PRESENTATION_COPY_ID, game_count=game_count)
         progress_bar.update(1)
 
         progress_bar.set_description(f"{game_number} Deleting Slides")
@@ -141,7 +146,7 @@ def get_slide_id(id):
     return slide_ids
 
 
-def copy_slide():
+def copy_slide(PRESENTATION_ID):
 
     try:
         drive_response = drive_service.files().copy(
@@ -200,9 +205,9 @@ def edit_image_request(requests, image_id, image_url, slide):
     return requests
 
 
-def get_images(PRESENTATION_COPY_ID):
+def get_images(PRESENTATION_COPY_ID, game_count):
 
-    global game_count
+    # global game_count
 
     slide_ids = get_slide_id(PRESENTATION_COPY_ID)
 

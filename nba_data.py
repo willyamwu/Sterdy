@@ -128,7 +128,7 @@ def build_text(game_id):
     instagram_caption += "\n\n\n\n\n#nba #basketball #bball #🏀 "
     instagram_caption += f"#{(team1.team_city + team1.team_name).replace(' ', '')} #{(team2.team_city + team2.team_name).replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
 
-    for i in range(10):
+    for i in range(1, 10):
         full_name = players[i].full_name.replace(" ", '').replace(
             '.', '').replace('-', '').replace('\'', '')
         # last_name = players[i].last_name.replace(' ', '').replace(

@@ -25,6 +25,7 @@ def path_finder():
             # Activate nba scripts
             nba_data.get_games()
             # print(nba_data.master_dict)
+            # nba_build.intialize(nba_data.master_dict, nba_data.unique_games)
             nba_build.create_request(
                 nba_data.master_dict, nba_data.unique_games)
             nba_post.twitter_post(nba_build.all_image_paths,
