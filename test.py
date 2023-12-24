@@ -22,7 +22,7 @@ import re
 from datetime import datetime, timedelta
 import seaborn as sns
 
-
+# Convert PTXXMXX.XXS into seconds
 def convert_clock_to_time(clock, quarter):
     # Extract minutes, seconds, and tenths of a second using regular expressions
     match = re.match(r'PT(\d{2})M(\d{2}\.\d{2})S', clock)
@@ -31,56 +31,64 @@ def convert_clock_to_time(clock, quarter):
         # Split seconds and tenths of a second
         seconds, tenths = map(int, seconds_with_tenths.split('.'))
         # Calculate total seconds including tenths
-        total_seconds = 720 - (int(minutes) * 60 +
-                               seconds) + (quarter - 1) * 720
+        total_seconds = 720 - (int(minutes) * 60 + seconds) + (quarter - 1) * 720
         return total_seconds
-        # # Convert to timedelta
-        # delta = timedelta(seconds=total_seconds)
-        # # Create a datetime object with a reference date (midnight)
-        # reference_date = datetime(1900, 1, 1)
-        # result_time = reference_date + delta
-        # return result_time.time()
     else:
         return None
 
-
-play = PlayByPlayV3(end_period=0, game_id='0022300382',
-                    start_period=0).get_data_frames()[0]
-# print(play)
+# Get play by play data for the game
+play = PlayByPlayV3(end_period=0, game_id='0022300383', start_period=0).get_data_frames()[0]
 
 times = []
 away_score = []
 home_score = []
-difference = []
+# difference = []
+# everything = []
 
 
 for index, row in play.iterrows():
-    if row['shotResult'] == 'Made':
+    if row['shotResult'] == 'Made' or row['subType'] == 'end':
         times.append(convert_clock_to_time(row['clock'], row['period']))
         away_score.append(int(row['scoreAway']))
         home_score.append(int(row['scoreHome']))
-        difference.append(int(row['scoreHome']) - int(row['scoreAway']))
-
-        # if times[-1] < 720:
-        #     print(row)
+        # difference.append(int(row['scoreHome']) - int(row['scoreAway']))
+        # everything.append(row)
 
 times = np.array(times)
-difference = np.array(difference)
+# difference = np.array(difference)
 away_score = np.array(away_score)
 home_score = np.array(home_score)
 
+# print(times)
+# print(away_score)
+# print(home_score)
 
+score_times = np.array([720, 1440, 2160, 2880])
+away_score_intervals = []
+home_score_intervals = []
 
+for target in score_times:
+    target_values = np.where(times <= target)[-1]
+    closest_index = target_values[np.argmin(np.abs(times[target_values] - target))]
+    home_score_intervals.append(home_score[closest_index])
+    away_score_intervals.append(away_score[closest_index])
 
+    # print(everything[closest_index])
+    # print(times[closest_index])
+    # print(home_score[closest_index])
+    # print(away_score[closest_index])
+
+    # closest_value = target_values[np.argmin(np.abs(target_values - target))
+away_score_intervals = np.array(away_score_intervals)
+home_score_intervals = np.array(home_score_intervals)
+# print("hi")
+# print(away_score_intervals)
 
 sns.set(style="whitegrid")
 
-
-plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.figsize"] = [7.50, 7.50]
 plt.rcParams["figure.autolayout"] = True
 plt.rcParams['font.family'] = 'monospace'  # Choose your desired font family
-
-y2 = 0
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -88,10 +96,9 @@ ax = fig.add_subplot(111)
 # ax.fill_between(times, difference, where=(difference >=0), step="pre", color='green', alpha=0.3)
 # ax.fill_between(times, difference, where=(difference <= 0), step="pre", color='red', alpha=0.3)
 
-print(len(times))
-print(len(away_score))
-print(len(home_score))
-
+# print(len(times))
+# print(len(away_score))
+# print(len(home_score))
 
 for i in range(len(times)):
     awayScore = away_score[i]
@@ -99,7 +106,7 @@ for i in range(len(times)):
     timez = times[i]
     # print(awayScore)
     if i > 0 and homeScore > away_score[i-1] and homeScore < awayScore:
-        # print("curr")
+        # print("prev")
         # print(f"{home_score[i-1]}:")
         # print(away_score[i-1])
         # print(times[i-1])
@@ -113,59 +120,69 @@ for i in range(len(times)):
         # print(times[i+1])
         # print("")
         time_temp = [times[i-1], times[i]]
-        home_score_temp = np.array([home_score[i], home_score[i]])
-        away_score_temp =np.array([away_score[i], away_score[i]])
+        home_score_temp = np.array([home_score[i-1], home_score[i-1]])
+        away_score_temp =np.array([away_score[i-1], away_score[i-1]])
 
-        print(time_temp)
-        print(home_score_temp)
-        print(away_score_temp)
+        # print(time_temp)
+        # print(home_score_temp)
+        # print(away_score_temp)
 
         ax.fill_between(time_temp, away_score_temp, home_score_temp, where=(
-    away_score_temp >= home_score_temp), step='pre', color='blue', alpha=0.3)
+    away_score_temp <= home_score_temp), step='post', color='blue', alpha=0.3)
     if i > 0 and awayScore > home_score[i-1] and homeScore > awayScore:
-        print(f"{home_score[i-1]}:")
-        print(away_score[i-1])
-        print("kmcdsklmc")
-        print(f"{homeScore}:")
-        print(awayScore)
+        # print(f"{home_score[i-1]}:")
+        # print(away_score[i-1])
+        # print("kmcdsklmc")
+        # print(f"{homeScore}:")
+        # print(awayScore)
 
         time_temp = [times[i-1], times[i]]
-        home_score_temp = np.array([home_score[i], home_score[i]])
-        away_score_temp =np.array([away_score[i], away_score[i]])
+        home_score_temp = np.array([home_score[i-1], home_score[i-1]])
+        away_score_temp =np.array([away_score[i-1], away_score[i-1]])
 
-        print(time_temp)
-        print(home_score_temp)
-        print(away_score_temp)
+        # print(time_temp)
+        # print(home_score_temp)
+        # print(away_score_temp)
 
         ax.fill_between(time_temp, away_score_temp, home_score_temp, where=(
-    away_score_temp <= home_score_temp), step='pre', color='purple', alpha=0.3)
+    away_score_temp >= home_score_temp), step='post', color='orange', alpha=0.3)
 
 
-ax.plot(times, away_score, drawstyle="steps", label="Kings")
-ax.plot(times, home_score, drawstyle="steps", label="Grizzlies")
+ax.plot(times, away_score, drawstyle="steps-post", label="Kings")
+ax.plot(times, home_score, drawstyle="steps-post", label="Grizzlies")
 
-ax.fill_between(times, home_score, away_score, where=(
-    home_score <= away_score), step='pre', color='green', alpha=0.3)
-ax.fill_between(times, home_score, away_score, where=(
-    home_score >= away_score), step='pre', color='red', alpha=0.3)
+ax.fill_between(times, home_score, away_score, where=(home_score <= away_score), step='post', color='green', alpha=0.3)
+ax.fill_between(times, home_score, away_score, where=(home_score >= away_score), step='post', color='red', alpha=0.3)
 
-plt.xlim([0, max(times)])
+plt.xlim([0, max(times) + 60])
 if away_score[-1] > home_score[-1]:
     plt.ylim([0, away_score[-1] + 5])
 else:
     plt.ylim([0, home_score[-1] + 5])
 
 
-ax.tick_params(axis='y', direction='out', length=6,
-               width=2, colors='black', grid_alpha=0.5)
+# ax.tick_params(axis='y', direction='out', length=6, width=2, colors='black', grid_alpha=0.5)
 ax.yaxis.grid(True, linestyle='--', linewidth=1)
 
-ax.scatter(720, 18, color='red', zorder=5)
-ax.annotate('100', (720, 18), textcoords="offset points",
-            xytext=(15, -10), ha='center', fontsize=10)
+# Plot points for each quarter
+ax.scatter(score_times, away_score_intervals, color='red', zorder=5, alpha=0.75)
+ax.scatter(score_times, home_score_intervals, color='red', zorder=5, alpha=0.75)
 
-ax.scatter(290, 10, color='red', zorder=5)
-
+# Create annotations for each labeled point
+for i in range(len(score_times)):
+    if away_score_intervals[i] >= home_score_intervals[i]:
+        away_score_coor = (-5, 7.5)
+        away_score_ha = 'right'
+        home_score_coor = (4, -13) 
+        home_score_ha = 'left'
+    else:
+        away_score_coor = (4, -13)
+        away_score_ha = 'left'
+        home_score_coor = (-5, 7.5) 
+        home_score_ha = 'right'
+    
+    ax.annotate(f'NYK:{str(away_score_intervals[i])}', (score_times[i], away_score_intervals[i]), textcoords="offset points", xytext=away_score_coor, ha=away_score_ha, fontsize=8)
+    ax.annotate(f'SAS:{str(home_score_intervals[i])}', (score_times[i], home_score_intervals[i]), textcoords="offset points", xytext=home_score_coor, ha=home_score_ha, fontsize=8, color='red')
 
 
 plt.gca().spines['top'].set_visible(False)
@@ -178,16 +195,21 @@ sns.despine(bottom=True)
 
 plt.title('Grizzlies v. Kings')
 
-custom_xticks = [0, 720, 1440, 2160, 2880]  # Example custom tick positions
-custom_labels = ['0','EO-Q1', 'EO-Q2', 'EO-Q3', 'EO-Q4']  # Example custom tick labels
+# Custom x-ticks for each quarter
+custom_xticks = [720, 1440, 2160, 2880]
+custom_labels = ['EO-Q1', 'EO-Q2', 'EO-Q3', 'EO-Q4']
 ax.set_xticks(custom_xticks)
 ax.set_xticklabels(custom_labels)
 
 # Add legend
 plt.legend()
 
+# plt.savefig('your_graph.png', format='png')
+
+
 # Show the plot
 plt.show()
+
 
 
 # Use step to create a staircase plot with filled areas
