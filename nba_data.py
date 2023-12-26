@@ -135,7 +135,7 @@ def build_text(game_id):
         #     '.', '').replace('-', '').replace('\'', '')
         instagram_caption += f"#{full_name} "
 
-    instagram_caption += "#espn #overtime #houseofhighlights"
+    instagram_caption += "#espn #overtime #houseofhighlights #jellyfam #ballislife "
 
     master_dict[game_id]['INSTAGRAM_CAPTION'] = instagram_caption
     print(instagram_caption)
