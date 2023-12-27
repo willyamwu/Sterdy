@@ -63,8 +63,8 @@ GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
 
-def intialize(master_dict, game_ids):
-    create_team_request(drive_service, slides_service, master_dict, game_ids)
+# def intialize(master_dict, game_ids):
+#     create_team_request(drive_service, slides_service, master_dict, game_ids)
 
 def create_request(master_dict, game_ids):
     game_count = 1

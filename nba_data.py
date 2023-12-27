@@ -3,9 +3,10 @@ import re
 import sys
 import time
 import CONSTANTS
+import numpy as np
 from nba_models.nba_player import NBA_Player
 from nba_models.nba_team import NBA_Team
-from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, BoxScoreDefensiveV2
+from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, BoxScoreDefensiveV2, PlayByPlayV3
 from datetime import datetime, timedelta
 
 all_text = {}
@@ -13,9 +14,8 @@ master_dict = {}
 unique_games = []
 game_dict = {}
 
+
 # Gets all the games that are played on a certain day.
-
-
 def get_games():
     try:
         game_finder = LeagueGameFinder(date_from_nullable=CONSTANTS.yesterday_date_string,
@@ -48,8 +48,6 @@ def get_games():
 
         player_boxscore = BoxScoreTraditionalV3(
             game_id=game).get_data_frames()[0]
-        team_boxscore = BoxScoreTraditionalV3(
-            game_id=game).get_data_frames()[2]
 
         for index, row in player_boxscore.iterrows():
             if (row['minutes']):
@@ -58,13 +56,42 @@ def get_games():
             else:
                 pass
 
+        team_boxscore = BoxScoreTraditionalV3(
+            game_id=game).get_data_frames()[2]
+                
         for i in range(len(team_boxscore)):
             team = NBA_Team(team_boxscore.iloc[i])
             team_data.append(team)
 
+        play = PlayByPlayV3(end_period=0, game_id=game, start_period=0).get_data_frames()[0]
+
+        play_make_shot_clock = []
+        away_score = []
+        home_score = []
+        # difference = []
+        # everything = []
+
+        for index, row in play.iterrows():
+            # print(row)
+            if row['shotResult'] == 'Made' or row['subType'] == 'end':
+                play_make_shot_clock.append(convert_clock_to_time(row['clock'], row['period']))
+                away_score.append(int(row['scoreAway']))
+                home_score.append(int(row['scoreHome']))
+                # difference.append(int(row['scoreHome']) - int(row['scoreAway']))
+                # everything.append(row)
+
+        play_make_shot_clock = np.array(play_make_shot_clock)
+        # difference = np.array(difference)
+        away_score = np.array(away_score)
+        home_score = np.array(home_score)
+
         player_data = sort_players_by_rating(player_data)[:10]
         master_dict[game]['PLAYERS'] = player_data
         master_dict[game]['TEAMS'] = team_data
+        # master_dict[game]['TEAMS']['TIMES'] = play_make_shot_clock
+        # master_dict[game]['TEAMS']['AWAY_SCORE_PROGRESSION'] = away_score
+        # master_dict[game]['TEAMS']['HOME_SCORE_PROGRESSION'] = home_score
+
         # print(master_dict[game]['TEAMS'][0].team_stats_array)
         # print("team data:",team_data[0].team_slug,team_data[0].rating, " dkemdkem ", team_data[1].team_city,team_data[1].rating)
         build_text(game)
@@ -141,6 +168,20 @@ def build_text(game_id):
     print(instagram_caption)
 
     # print(slide_matchup_text)
+
+# Convert PTXXMXX.XXS into seconds
+def convert_clock_to_time(clock, quarter):
+    # Extract minutes, seconds, and tenths of a second using regular expressions
+    match = re.match(r'PT(\d{2})M(\d{2}\.\d{2})S', clock)
+    if match:
+        minutes, seconds_with_tenths = match.groups()
+        # Split seconds and tenths of a second
+        seconds, tenths = map(int, seconds_with_tenths.split('.'))
+        # Calculate total seconds including tenths
+        total_seconds = 720 - (int(minutes) * 60 + seconds) + (quarter - 1) * 720
+        return total_seconds
+    else:
+        return None
 
 
 # def divide_post(message):

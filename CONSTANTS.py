@@ -38,11 +38,9 @@ client = tweepy.Client(
 
 
 current_date = datetime.now()   # Get the current date and time
-current_date_string = current_date.strftime(
-    '%Y-%m-%d')    # Format the current date as a string
+current_date_string = current_date.strftime('%Y-%m-%d')    # Format the current date as a string
 
-yesterday_date = current_date - \
-    timedelta(days=1)   # Calculate yesterday's date
+yesterday_date = current_date - timedelta(days=1)   # Calculate yesterday's date
 yesterday_date_string = yesterday_date.strftime(
     '%m/%d/%Y')    # Format yesterday's date as a string
 
