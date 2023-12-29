@@ -79,42 +79,14 @@ def convert_clock_to_time(clock, quarter):
         return None
 
 def generate_point_graph(dict_data):
-    # if dict_data['BOXSCORE'][0].isHome:
-    #     home_team_index = 0
-    #     away_team_index = 1
-    # else:
-    #     home_team_index = 1
-    #     away_team_index = 0
-
-
-    # home_team_name = dict_data['BOXSCORE'][0].tri if dict_data['BOXSCORE'][0]
-    # away_team = if dict_data[]
-    # # Get play by play data for the game
-    # play = PlayByPlayV3(end_period=0, game_id='0022300383', start_period=0).get_data_frames()[0]
-
-    # play_make_shot_clock = []
-    # away_score = []
-    # home_score = []
-    # # difference = []
-    # # everything = []
-
-
-    # for index, row in play.iterrows():
-    #     if row['shotResult'] == 'Made' or row['subType'] == 'end':
-    #         play_make_shot_clock.append(convert_clock_to_time(row['clock'], row['period']))
-    #         away_score.append(int(row['scoreAway']))
-    #         home_score.append(int(row['scoreHome']))
-    #         # difference.append(int(row['scoreHome']) - int(row['scoreAway']))
-    #         # everything.append(row)
-
     play_make_shot_clock = dict_data['SCORE_PROGRESSION'][0]
     # difference = np.array(difference)
     home_score = dict_data['SCORE_PROGRESSION'][1]
     away_score = dict_data['SCORE_PROGRESSION'][2]
 
-    print(play_make_shot_clock)
-    print(home_score)
-    print(away_score)
+    # print(play_make_shot_clock)
+    # print(home_score)
+    # print(away_score)
 
     # score_times = np.array([720, 1440, 2160, 2880])
     # away_score_intervals = []
@@ -153,8 +125,8 @@ def generate_point_graph(dict_data):
     # print(len(away_score))
     # print(len(home_score))
 
-    ax.plot(play_make_shot_clock, home_score, drawstyle="steps-post", color='red', label="Grizzlies")
-    ax.plot(play_make_shot_clock, away_score, drawstyle="steps-post", color='blue', label="Kings")
+    ax.plot(play_make_shot_clock, home_score, drawstyle="steps-post", color='red', label=dict_data['HOME'].team_name)
+    ax.plot(play_make_shot_clock, away_score, drawstyle="steps-post", color='blue', label=dict_data['AWAY'].team_name)
 
     for i in range(len(play_make_shot_clock)):
         awayScore = away_score[i]
@@ -205,9 +177,8 @@ def generate_point_graph(dict_data):
         away_score_temp >= home_score_temp), step='post', color='red', alpha=0.3)
             
 
-
-    ax.fill_between(play_make_shot_clock, home_score, away_score, where=(home_score <= away_score), step='post', color='blue', alpha=0.3)
     ax.fill_between(play_make_shot_clock, home_score, away_score, where=(home_score >= away_score), step='post', color='red', alpha=0.3)
+    ax.fill_between(play_make_shot_clock, home_score, away_score, where=(home_score <= away_score), step='post', color='blue', alpha=0.3)
 
     plt.xlim([0, max(play_make_shot_clock) + 60])
     if away_score[-1] > home_score[-1]:
@@ -228,18 +199,12 @@ def generate_point_graph(dict_data):
         home_score_intervals.append(home_score[index])
         away_score_intervals.append(away_score[index])
 
-    print(home_score_intervals)
-    print(away_score_intervals)
-
     home_score_intervals = np.array(home_score_intervals)
     away_score_intervals = np.array(away_score_intervals)
 
-    print(home_score_intervals)
-    print(away_score_intervals)
-
     # Plot points for each quarter
-    ax.scatter(score_times, home_score_intervals, color='blue', zorder=5, alpha=0.75)
-    ax.scatter(score_times, away_score_intervals, color='red', zorder=5, alpha=0.75)
+    ax.scatter(score_times, home_score_intervals, color='red', zorder=5, alpha=0.75)
+    ax.scatter(score_times, away_score_intervals, color='blue', zorder=5, alpha=0.75)
 
     # Create annotations for each labeled point
     for i in range(len(score_times)):
@@ -254,8 +219,8 @@ def generate_point_graph(dict_data):
             home_score_coor = (-5, 7.5) 
             home_score_ha = 'right'
 
-        ax.annotate(f':{str(home_score_intervals[i])}', (score_times[i], home_score_intervals[i]), textcoords="offset points", xytext=home_score_coor, ha=home_score_ha, fontsize=8)
-        ax.annotate(f'HI:{str(away_score_intervals[i])}', (score_times[i], away_score_intervals[i]), textcoords="offset points", xytext=away_score_coor, ha=away_score_ha, fontsize=8)
+        ax.annotate(f'{dict_data["HOME"].team_tricode}:{str(home_score_intervals[i])}', (score_times[i], home_score_intervals[i]), textcoords="offset points", xytext=home_score_coor, ha=home_score_ha, fontsize=8)
+        ax.annotate(f'{dict_data["AWAY"].team_tricode}:{str(away_score_intervals[i])}', (score_times[i], away_score_intervals[i]), textcoords="offset points", xytext=away_score_coor, ha=away_score_ha, fontsize=8)
 
 
     plt.gca().spines['top'].set_visible(False)
@@ -266,7 +231,7 @@ def generate_point_graph(dict_data):
     sns.despine(bottom=True)
 
 
-    plt.title('Grizzlies v. Kings')
+    plt.title('Grizzlies v. Kings\nScore Progression')
 
     # Custom x-ticks for each quarter
     custom_xticks = [720, 1440, 2160, 2880]
@@ -277,9 +242,7 @@ def generate_point_graph(dict_data):
     # Add legend
     plt.legend()
 
-    # plt.savefig('your_graph.png', format='png')
-
-    plt.savefig('my_plot.jpeg')
+    plt.savefig('my_plot.jpeg', dpi=300)
 
 
 
