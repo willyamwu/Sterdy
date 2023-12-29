@@ -224,8 +224,9 @@ def generate_point_graph(dict_data):
     home_score_intervals = []
     away_score_intervals = []
     for score_time in score_times:
-        home_score_intervals.append(home_score[np.where(play_make_shot_clock == score_time)[0]])
-        away_score_intervals.append(away_score[np.where(play_make_shot_clock == score_time)[0]])
+        index = np.argmax(play_make_shot_clock == score_time)
+        home_score_intervals.append(home_score[index])
+        away_score_intervals.append(away_score[index])
 
     print(home_score_intervals)
     print(away_score_intervals)
