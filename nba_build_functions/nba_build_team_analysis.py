@@ -1,5 +1,6 @@
 import json
 from logging import Logger
+from pty import master_open
 import re
 import CONSTANTS
 from PIL import Image
@@ -44,7 +45,7 @@ def create_team_request(master_dict, game_ids):
         slide_requests = edit_text_request(slide_requests, '{DATE}', CONSTANTS.yesterday_date_string)
         progress_bar.update(1)
 
-        slide_requests = get_special_keys(value=master_dict[game]["TEAMS"],
+        slide_requests = get_special_keys(value=[master_dict[game]["TEAMS"]['HOME'], master_dict[game]["TEAMS"]['AWAY']],
                                     progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=team_key_array, iterations=2)
         
         slides_service.presentations().batchUpdate(
@@ -53,6 +54,8 @@ def create_team_request(master_dict, game_ids):
         progress_bar.set_description(f"{game_number} Downloading Images")
         get_images(PRESENTATION_COPY_ID, game_count)
         progress_bar.update(1)
+
+        generate_point_graph(master_dict[game]['TEAMS'])
 
         progress_bar.set_description(f"{game_number} Deleting Slides")
         delete_slide(PRESENTATION_COPY_ID)
@@ -75,48 +78,62 @@ def convert_clock_to_time(clock, quarter):
     else:
         return None
 
-def generate_point_graph():
-    # Get play by play data for the game
-    play = PlayByPlayV3(end_period=0, game_id='0022300383', start_period=0).get_data_frames()[0]
-
-    times = []
-    away_score = []
-    home_score = []
-    # difference = []
-    # everything = []
+def generate_point_graph(dict_data):
+    # if dict_data['BOXSCORE'][0].isHome:
+    #     home_team_index = 0
+    #     away_team_index = 1
+    # else:
+    #     home_team_index = 1
+    #     away_team_index = 0
 
 
-    for index, row in play.iterrows():
-        if row['shotResult'] == 'Made' or row['subType'] == 'end':
-            times.append(convert_clock_to_time(row['clock'], row['period']))
-            away_score.append(int(row['scoreAway']))
-            home_score.append(int(row['scoreHome']))
-            # difference.append(int(row['scoreHome']) - int(row['scoreAway']))
-            # everything.append(row)
+    # home_team_name = dict_data['BOXSCORE'][0].tri if dict_data['BOXSCORE'][0]
+    # away_team = if dict_data[]
+    # # Get play by play data for the game
+    # play = PlayByPlayV3(end_period=0, game_id='0022300383', start_period=0).get_data_frames()[0]
 
-    times = np.array(times)
+    # play_make_shot_clock = []
+    # away_score = []
+    # home_score = []
+    # # difference = []
+    # # everything = []
+
+
+    # for index, row in play.iterrows():
+    #     if row['shotResult'] == 'Made' or row['subType'] == 'end':
+    #         play_make_shot_clock.append(convert_clock_to_time(row['clock'], row['period']))
+    #         away_score.append(int(row['scoreAway']))
+    #         home_score.append(int(row['scoreHome']))
+    #         # difference.append(int(row['scoreHome']) - int(row['scoreAway']))
+    #         # everything.append(row)
+
+    play_make_shot_clock = dict_data['SCORE_PROGRESSION'][0]
     # difference = np.array(difference)
-    away_score = np.array(away_score)
-    home_score = np.array(home_score)
+    home_score = dict_data['SCORE_PROGRESSION'][1]
+    away_score = dict_data['SCORE_PROGRESSION'][2]
 
-    score_times = np.array([720, 1440, 2160, 2880])
-    away_score_intervals = []
-    home_score_intervals = []
+    print(play_make_shot_clock)
+    print(home_score)
+    print(away_score)
 
-    for target in score_times:
-        target_values = np.where(times <= target)[-1]
-        closest_index = target_values[np.argmin(np.abs(times[target_values] - target))]
-        home_score_intervals.append(home_score[closest_index])
-        away_score_intervals.append(away_score[closest_index])
+    # score_times = np.array([720, 1440, 2160, 2880])
+    # away_score_intervals = []
+    # home_score_intervals = []
 
-        # print(everything[closest_index])
-        # print(times[closest_index])
-        # print(home_score[closest_index])
-        # print(away_score[closest_index])
+    # for target in score_times:
+    #     target_values = np.where(play_make_shot_clock <= target)[-1]
+    #     closest_index = target_values[np.argmin(np.abs(play_make_shot_clock[target_values] - target))]
+    #     home_score_intervals.append(home_score[closest_index])
+    #     away_score_intervals.append(away_score[closest_index])
 
-        # closest_value = target_values[np.argmin(np.abs(target_values - target))
-    away_score_intervals = np.array(away_score_intervals)
-    home_score_intervals = np.array(home_score_intervals)
+    #     # print(everything[closest_index])
+    #     # print(times[closest_index])
+    #     # print(home_score[closest_index])
+    #     # print(away_score[closest_index])
+
+    #     # closest_value = target_values[np.argmin(np.abs(target_values - target))
+    # away_score_intervals = np.array(away_score_intervals)
+    # home_score_intervals = np.array(home_score_intervals)
     # print("hi")
     # print(away_score_intervals)
 
@@ -136,10 +153,13 @@ def generate_point_graph():
     # print(len(away_score))
     # print(len(home_score))
 
-    for i in range(len(times)):
+    ax.plot(play_make_shot_clock, home_score, drawstyle="steps-post", color='red', label="Grizzlies")
+    ax.plot(play_make_shot_clock, away_score, drawstyle="steps-post", color='blue', label="Kings")
+
+    for i in range(len(play_make_shot_clock)):
         awayScore = away_score[i]
         homeScore = home_score[i]
-        timez = times[i]
+        timez = play_make_shot_clock[i]
         # print(awayScore)
         if i > 0 and homeScore > away_score[i-1] and homeScore < awayScore:
             # print("prev")
@@ -155,7 +175,7 @@ def generate_point_graph():
             # print(away_score[i+1])
             # print(times[i+1])
             # print("")
-            time_temp = [times[i-1], times[i]]
+            time_temp = [play_make_shot_clock[i-1], play_make_shot_clock[i]]
             home_score_temp = np.array([home_score[i-1], home_score[i-1]])
             away_score_temp =np.array([away_score[i-1], away_score[i-1]])
 
@@ -165,6 +185,7 @@ def generate_point_graph():
 
             ax.fill_between(time_temp, away_score_temp, home_score_temp, where=(
         away_score_temp <= home_score_temp), step='post', color='blue', alpha=0.3)
+            
         if i > 0 and awayScore > home_score[i-1] and homeScore > awayScore:
             # print(f"{home_score[i-1]}:")
             # print(away_score[i-1])
@@ -172,7 +193,7 @@ def generate_point_graph():
             # print(f"{homeScore}:")
             # print(awayScore)
 
-            time_temp = [times[i-1], times[i]]
+            time_temp = [play_make_shot_clock[i-1], play_make_shot_clock[i]]
             home_score_temp = np.array([home_score[i-1], home_score[i-1]])
             away_score_temp =np.array([away_score[i-1], away_score[i-1]])
 
@@ -181,16 +202,14 @@ def generate_point_graph():
             # print(away_score_temp)
 
             ax.fill_between(time_temp, away_score_temp, home_score_temp, where=(
-        away_score_temp >= home_score_temp), step='post', color='orange', alpha=0.3)
+        away_score_temp >= home_score_temp), step='post', color='red', alpha=0.3)
+            
 
 
-    ax.plot(times, away_score, drawstyle="steps-post", label="Kings")
-    ax.plot(times, home_score, drawstyle="steps-post", label="Grizzlies")
+    ax.fill_between(play_make_shot_clock, home_score, away_score, where=(home_score <= away_score), step='post', color='blue', alpha=0.3)
+    ax.fill_between(play_make_shot_clock, home_score, away_score, where=(home_score >= away_score), step='post', color='red', alpha=0.3)
 
-    ax.fill_between(times, home_score, away_score, where=(home_score <= away_score), step='post', color='green', alpha=0.3)
-    ax.fill_between(times, home_score, away_score, where=(home_score >= away_score), step='post', color='red', alpha=0.3)
-
-    plt.xlim([0, max(times) + 60])
+    plt.xlim([0, max(play_make_shot_clock) + 60])
     if away_score[-1] > home_score[-1]:
         plt.ylim([0, away_score[-1] + 5])
     else:
@@ -200,9 +219,26 @@ def generate_point_graph():
     # ax.tick_params(axis='y', direction='out', length=6, width=2, colors='black', grid_alpha=0.5)
     ax.yaxis.grid(True, linestyle='--', linewidth=1)
 
+
+    score_times = np.array([720, 1440, 2160, 2880])
+    home_score_intervals = []
+    away_score_intervals = []
+    for score_time in score_times:
+        home_score_intervals.append(home_score[np.where(play_make_shot_clock == score_time)[0]])
+        away_score_intervals.append(away_score[np.where(play_make_shot_clock == score_time)[0]])
+
+    print(home_score_intervals)
+    print(away_score_intervals)
+
+    home_score_intervals = np.array(home_score_intervals)
+    away_score_intervals = np.array(away_score_intervals)
+
+    print(home_score_intervals)
+    print(away_score_intervals)
+
     # Plot points for each quarter
+    ax.scatter(score_times, home_score_intervals, color='blue', zorder=5, alpha=0.75)
     ax.scatter(score_times, away_score_intervals, color='red', zorder=5, alpha=0.75)
-    ax.scatter(score_times, home_score_intervals, color='red', zorder=5, alpha=0.75)
 
     # Create annotations for each labeled point
     for i in range(len(score_times)):
@@ -216,9 +252,9 @@ def generate_point_graph():
             away_score_ha = 'left'
             home_score_coor = (-5, 7.5) 
             home_score_ha = 'right'
-        
-        ax.annotate(f'NYK:{str(away_score_intervals[i])}', (score_times[i], away_score_intervals[i]), textcoords="offset points", xytext=away_score_coor, ha=away_score_ha, fontsize=8)
-        ax.annotate(f'SAS:{str(home_score_intervals[i])}', (score_times[i], home_score_intervals[i]), textcoords="offset points", xytext=home_score_coor, ha=home_score_ha, fontsize=8, color='red')
+
+        ax.annotate(f':{str(home_score_intervals[i])}', (score_times[i], home_score_intervals[i]), textcoords="offset points", xytext=home_score_coor, ha=home_score_ha, fontsize=8)
+        ax.annotate(f'HI:{str(away_score_intervals[i])}', (score_times[i], away_score_intervals[i]), textcoords="offset points", xytext=away_score_coor, ha=away_score_ha, fontsize=8)
 
 
     plt.gca().spines['top'].set_visible(False)
@@ -242,7 +278,8 @@ def generate_point_graph():
 
     # plt.savefig('your_graph.png', format='png')
 
+    plt.savefig('my_plot.jpeg')
 
-    # Show the plot
-    plt.show()
+
+
 

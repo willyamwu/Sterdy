@@ -1,13 +1,14 @@
-import math
+# import math
 import re
-import sys
-import time
+# import sys
+# import time
 import CONSTANTS
 import numpy as np
 from nba_models.nba_player import NBA_Player
 from nba_models.nba_team import NBA_Team
-from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, BoxScoreDefensiveV2, PlayByPlayV3
-from datetime import datetime, timedelta
+from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, PlayByPlayV3
+# BoxScoreDefensiveV2
+# from datetime import datetime, timedelta
 
 all_text = {}
 master_dict = {}
@@ -48,6 +49,7 @@ def get_games():
 
         player_boxscore = BoxScoreTraditionalV3(
             game_id=game).get_data_frames()[0]
+        
 
         for index, row in player_boxscore.iterrows():
             if (row['minutes']):
@@ -69,7 +71,40 @@ def get_games():
         away_score = []
         home_score = []
         # difference = []
-        # everything = []
+        everything = []
+
+        away_team = None
+        home_team = None
+        count = 0
+
+        for index, row in play.iterrows():
+            if row['shotResult'] == 'Made':
+                everything.append(row)
+                if count > 0:
+                    if everything[count]['scoreAway'] > everything[count - 1]['scoreAway']:
+                        if team_data[0].team_id == everything[count]['teamId']:
+                            home_team = team_data[1]
+                            away_team = team_data[0]
+                            team_data[0].isHome = False
+                            team_data[1].isHome = True
+                        else:
+                            home_team = team_data[0]
+                            away_team = team_data[1]
+                            team_data[0].isHome = True
+                            team_data[1].isHome = False
+                        
+                        del everything
+                        break
+                    #     away_team.append(everything[count]['teamId'])
+                    #     away_team.append(everything[count]['teamTricode'])
+                    # elif everything[count]['scoreHome'] > everything[count - 1]['scoreHome'] and not home_team_id:
+                    #     home_team.append(everything[count]['teamId'])
+                    #     home_team.append(everything[count]['teamTricode'])
+                    # else:
+                    #     del everything
+                    #     break
+                count += 1
+
 
         for index, row in play.iterrows():
             # print(row)
@@ -85,9 +120,14 @@ def get_games():
         away_score = np.array(away_score)
         home_score = np.array(home_score)
 
+
         player_data = sort_players_by_rating(player_data)[:10]
         master_dict[game]['PLAYERS'] = player_data
-        master_dict[game]['TEAMS'] = team_data
+        master_dict[game]['TEAMS'] = {'HOME': home_team, 'AWAY': away_team, 'SCORE_PROGRESSION': [play_make_shot_clock, home_score, away_score]}
+
+
+
+        # master_dict[game]['TEAMS']['BOXSCORE'] = team_data
         # master_dict[game]['TEAMS']['TIMES'] = play_make_shot_clock
         # master_dict[game]['TEAMS']['AWAY_SCORE_PROGRESSION'] = away_score
         # master_dict[game]['TEAMS']['HOME_SCORE_PROGRESSION'] = home_score
@@ -132,8 +172,8 @@ def build_text(game_id):
 
     master_dict[game_id]['SLIDE_MATCHUP'] = slide_matchup_text
 
-    team1 = master_dict[game_id]['TEAMS'][0]
-    team2 = master_dict[game_id]['TEAMS'][1]
+    team1 = master_dict[game_id]['TEAMS']['HOME']
+    team2 = master_dict[game_id]['TEAMS']['AWAY']
     players = master_dict[game_id]['PLAYERS']
 
     # Building the tweet text
@@ -182,6 +222,10 @@ def convert_clock_to_time(clock, quarter):
         return total_seconds
     else:
         return None
+
+
+
+
 
 
 # def divide_post(message):

@@ -10,6 +10,7 @@ class NBA_Team:
         self.team_city = data['teamCity']
         self.team_tricode = data['teamTricode']
         self.team_slug = data['teamSlug']
+        self.isHome = None
         self.calculate_rating()
         self.get_season_stats()
         self.stats_array = [f"{self.team_slug.title()}{self.conference_ranking}", f"{str(self.wins)}-{str(self.loses)}", str(self.pts), str(self.rating), self.fg, str(
