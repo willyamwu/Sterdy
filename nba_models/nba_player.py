@@ -1,4 +1,4 @@
-# from nba_api.stats.endpoints import PlayByPlayV3
+from nba_api.stats.endpoints import PlayByPlayV3
 
 
 class NBA_Player:
@@ -91,17 +91,17 @@ class NBA_Player:
         else:
             self.letter_grade = "D"
 
-    # def get_complete_plays(self):
-    #     plays = PlayByPlayV3(self.data["gameId"]).get_data_frames()[0]
+    def get_complete_plays(self):
+        plays = PlayByPlayV3(self.data["gameId"]).get_data_frames()[0]
 
-    #     field_goals = [row for index,
-    #                    row in plays.iterrows() if row['personId'] == self.person_id if row['actionType'] == "Made Shot"]
+        field_goals = [row for index,
+                       row in plays.iterrows() if row['personId'] == self.person_id if row['actionType'] == "Made Shot"]
 
-    #     self.complete_plays = "| "
-    #     for item in field_goals:
-    #         original_string = item["description"].replace(
-    #             self.last_name, "").split("(", 1)[0].strip()
+        self.complete_plays = "| "
+        for item in field_goals:
+            original_string = item["description"].replace(
+                self.last_name, "").split("(", 1)[0].strip()
 
-    #         self.complete_plays += original_string + " | "
+            self.complete_plays += original_string + " | "
 
-    #     return self.complete_plays
+        return self.complete_plays

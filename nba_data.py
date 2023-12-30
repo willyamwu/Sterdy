@@ -163,14 +163,20 @@ def get_matchup(game_finder, unique_games):
 def build_text(game_id):
     count = 0
     slide_matchup_text = ""
+    slide_matchup_score_text = ""
+
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
             slide_matchup_text = slide_matchup_text + key
+            slide_matchup_score_text += key + ": " + value
             if count == 0:
                 slide_matchup_text = slide_matchup_text + " @ "
+                slide_matchup_score_text = key + ": " + value + "    "
             count += 1
 
     master_dict[game_id]['SLIDE_MATCHUP'] = slide_matchup_text
+    master_dict[game_id]['SLIDE_MATCHUP_SCORE'] = slide_matchup_score_text
+
 
     team1 = master_dict[game_id]['TEAMS']['HOME']
     team2 = master_dict[game_id]['TEAMS']['AWAY']
@@ -182,6 +188,7 @@ def build_text(game_id):
 
     instagram_caption = f"{master_dict[game_id]['SLIDE_MATCHUP']} {CONSTANTS.yesterday_date_string}\n\n"
 
+
     for item in master_dict[game_id]['SCORE']:
         for key, value in item.items():
             tweet_text = tweet_text + key + ": " + value + "\n"
@@ -192,7 +199,7 @@ def build_text(game_id):
 
     master_dict[game_id]['TWITTER_MATCHUP'] = tweet_text
 
-    instagram_caption += "\n\n\n\n\n#nba #basketball #bball #🏀 "
+    instagram_caption += "\n\n\n\n\n#nba #basketball #bball #🏀 #sterdy "
     instagram_caption += f"#{(team1.team_city + team1.team_name).replace(' ', '')} #{(team2.team_city + team2.team_name).replace(' ', '')} #{team1.team_slug} #{team2.team_slug} #{team1.team_tricode} #{team2.team_tricode} "
 
     for i in range(1, 10):
@@ -202,7 +209,7 @@ def build_text(game_id):
         #     '.', '').replace('-', '').replace('\'', '')
         instagram_caption += f"#{full_name} "
 
-    instagram_caption += "#espn #overtime #houseofhighlights #jellyfam #ballislife "
+    instagram_caption += "#espn #overtime #BleacherReport #houseofhighlights #jellyfam #ballislife "
 
     master_dict[game_id]['INSTAGRAM_CAPTION'] = instagram_caption
     print(instagram_caption)
@@ -370,44 +377,3 @@ def convert_clock_to_time(clock, quarter):
 #     'min', 'fgm', 'fga', 'ftm', 'fta', 'pts', 'fg3m', 'fg3a', 'gp'
 # ]]
 
-
-# def calculate_performance_rating(row):
-#     player = NBA_Player(row)
-#     player.set_rating()
-#     print(player.rating)
-    # min = game_stats.loc[0, 'MIN']
-    # fgm = game_stats.loc[0, 'FGM']
-    # # fga = game_stats.loc[0, 'FGA']
-    # fg_pct = game_stats.loc[0, 'FG_PCT']
-    # fg_3_m = game_stats.loc[0, 'FG3M']
-    # # fg_3_a = game_stats.loc[0, 'FG3A']
-    # fg_3_pct = game_stats.loc[0, 'FG3_PCT']
-    # ftm = game_stats.loc[0, 'FTM']
-    # # fta = game_stats.loc[0, 'FTA']
-    # ft_pct = game_stats.loc[0, 'FT_PCT']
-    # reb = game_stats.loc[0, 'REB']
-    # ast = game_stats.loc[0, 'AST']
-    # stl = game_stats.loc[0, 'STL']
-    # blk = game_stats.loc[0, 'BLK']
-    # tov = game_stats.loc[0, 'TOV']
-    # pts = game_stats.loc[0, 'PTS']
-    # plus_minus = game_stats.loc[0, 'PTS']
-
-    # performance_rating = (
-    #     pts + reb + ast * 1.5 +
-    #     fgm + fg_3_m * 1.5 + ftm * 0.5 +
-    #     stl * 2 + blk * 2 -
-    #     tov * 1.5 +
-    #     plus_minus
-    # )
-
-    # shooting_percentage_bonus = (fg_pct * 2 + fg_3_pct * 3 + ft_pct) / 6
-    # performance_rating *= (1 + shooting_percentage_bonus)
-
-    # performance_rating = round(performance_rating, 2)
-
-    # player_data = CommonPlayerInfo(player_id=id).get_data_frames()[0]
-
-    # player_stat = {"NAME": player_data.at[0, 'DISPLAY_FIRST_LAST'], "TEAM":  player_data.at[0, 'TEAM_ABBREVIATION'], "RATING": performance_rating, "PTS": pts, "AST": ast, "REB": reb, "STL": stl, "BLK": blk, "DEF": stl + blk, "TOV": tov, "MIN": min}
-
-    # return player_stat
