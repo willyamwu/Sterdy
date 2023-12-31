@@ -88,7 +88,7 @@ def create_request(master_dict, game_ids):
                 requests=slide_requests, slide=slide_ids[i], image_url=f"https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/{master_dict[game]['PLAYERS'][i].person_id}.png", image_id="MyImage_" + str(i))
 
         progress_bar.set_description(f"{game_number} Updating Matchup text")
-        slide_requests = edit_text_request(slide_requests, '{MATCH}', master_dict[game]['SLIDE_MATCHUP'])
+        slide_requests = edit_text_request(slide_requests, '{MATCH}', master_dict[game]['SLIDE_MATCHUP_SCORE'])
         progress_bar.update(1)
 
         progress_bar.set_description(f"{game_number} Updating Date text")
