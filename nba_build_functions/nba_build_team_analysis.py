@@ -199,9 +199,9 @@ def generate_point_graph(dict_data, game_count):
     # Add legend
     plt.legend()
 
-    plt.savefig(f'Game_{game_count}_P2.jpeg', dpi=350)
+    plt.savefig(f'Game_{game_count}_P2.jpg', dpi=350)
 
-    nba_build.all_image_paths[f'Game_{game_count}'].append(f'Game_{game_count}_P2.jpeg')
+    nba_build.all_image_paths[f'Game_{game_count}'].append(f'Game_{game_count}_P2.jpg')
 
 
 
