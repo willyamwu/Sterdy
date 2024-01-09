@@ -7,7 +7,6 @@ import numpy as np
 from nba_models.nba_player import NBA_Player
 from nba_models.nba_team import NBA_Team
 from nba_api.stats.endpoints import LeagueGameFinder, BoxScoreTraditionalV3, PlayByPlayV3
-# BoxScoreDefensiveV2
 # from datetime import datetime, timedelta
 
 all_text = {}

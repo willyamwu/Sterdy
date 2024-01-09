@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import PlayByPlayV3
+# from nba_api.stats.endpoints import PlayByPlayV3
 
 
 class NBA_Player:
@@ -11,7 +11,12 @@ class NBA_Player:
         self.calculate_rating()
         self.get_letter_grade()
         self.stats_array = [self.team_tricode, self.full_name, str(self.rating), str(
-            self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl), str(self.plus_minus), str(self.fgm) + "/" + str(self.fga), str(self.ftm) + "/" + str(self.fta), str(round(self.average_shooting_percentage * 100, 1)) + "%", self.letter_grade]
+            self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl), str(self.plus_minus), 
+            str(self.fgm) + "/" + str(self.fga), str(self.ftm) + "/" + str(self.fta), 
+            str(round(self.average_shooting_percentage * 100, 1)) + "%", 
+            self.letter_grade, str(self.min), str(self.stl), str(self.blk), str(self.fg_pct) + "%", 
+            str(round(self.fg_3_m, 1)) + "/" + str(self.fg_3_a), str(self.tov), str(self.personal_fouls), 
+            str(self.oreb), str(self.dreb)]
 
     def calculate_rating(self):
         self.min = self.data['minutes']
@@ -19,18 +24,22 @@ class NBA_Player:
         self.fga = self.data['fieldGoalsAttempted']
         self.fg_pct = self.data['fieldGoalsPercentage']
         self.fg_3_m = self.data['threePointersMade']
-        # fg_3_a = self.data['FG3A']
+        self.fg_3_a = self.data['threePointersAttempted']
         self.fg_3_pct = self.data['threePointersPercentage']
         self.ftm = self.data['freeThrowsMade']
         self.fta = self.data['freeThrowsAttempted']
         self.ft_pct = self.data['freeThrowsPercentage']
-        self.reb = self.data['reboundsTotal']
         self.ast = self.data['assists']
         self.stl = self.data['steals']
         self.blk = self.data['blocks']
         self.tov = self.data['turnovers']
         self.pts = self.data['points']
         self.plus_minus = self.data['plusMinusPoints']
+        self.personal_fouls = self.data['foulsPersonal']
+        self.oreb = self.data['reboundsOffensive']
+        self.dreb = self.data['reboundsDefensive']
+        self.reb = self.data['reboundsTotal']
+
 
         performance_rating = (
             self.pts * 1.5 + self.reb * 0.75 + self.ast * 1.25 +
@@ -91,17 +100,17 @@ class NBA_Player:
         else:
             self.letter_grade = "D"
 
-    def get_complete_plays(self):
-        plays = PlayByPlayV3(self.data["gameId"]).get_data_frames()[0]
+    # def get_complete_plays(self):
+    #     plays = PlayByPlayV3(self.data["gameId"]).get_data_frames()[0]
 
-        field_goals = [row for index,
-                       row in plays.iterrows() if row['personId'] == self.person_id if row['actionType'] == "Made Shot"]
+    #     field_goals = [row for index,
+    #                    row in plays.iterrows() if row['personId'] == self.person_id if row['actionType'] == "Made Shot"]
 
-        self.complete_plays = "| "
-        for item in field_goals:
-            original_string = item["description"].replace(
-                self.last_name, "").split("(", 1)[0].strip()
+    #     self.complete_plays = "| "
+    #     for item in field_goals:
+    #         original_string = item["description"].replace(
+    #             self.last_name, "").split("(", 1)[0].strip()
 
-            self.complete_plays += original_string + " | "
+    #         self.complete_plays += original_string + " | "
 
-        return self.complete_plays
+    #     return self.complete_plays

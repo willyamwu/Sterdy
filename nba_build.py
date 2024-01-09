@@ -21,10 +21,11 @@ from tqdm import tqdm
 CLIENT_FILE = 'client_secret.json'
 CLIENT_ID = CONSTANTS.GOOGLE_CLIENT_ID
 CLIENT_SECRET = CONSTANTS.GOOGLE_CLIENT_SECRET
-PRESENTATION_ID = '1OkCzw0NV6ikJItZn2uU4Fxsd5ae2mDR31FLVkezsk7o'
+PRESENTATION_ID = '1SuQDwgHivYQXmW8ksOfwg1KGv5OvP1T2Bx94cfGUwOc'
 
 player_key_array = ['{T', '{NAME', '{RT', '{P', '{RB',
-                    '{A', '{D', '{PM', '{FG', '{FT', '{SH', '{L']
+                    '{A', '{D', '{PM', '{FG', '{FT', '{SH', '{L', '{M', '{S', 
+                    '{B', '{FS', '{3F', '{TO', '{PF','{OR', '{DR']
 team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
                   '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
 
@@ -95,8 +96,8 @@ def create_request(master_dict, game_ids):
         slide_requests = edit_text_request(slide_requests, '{DATE}', CONSTANTS.yesterday_date_string)
         progress_bar.update(1)
 
-        for i in range(3):
-            slide_requests = edit_text_request(requests=slide_requests, replacement_key="{CP" + str(i+1) + "}", replacement_text=master_dict[game]["PLAYERS"][i].get_complete_plays())
+        # for i in range(3):
+        #     slide_requests = edit_text_request(requests=slide_requests, replacement_key="{CP" + str(i+1) + "}", replacement_text=master_dict[game]["PLAYERS"][i].get_complete_plays())
 
         # slide_requests = get_special_keys(value=master_dict[game]["TEAMS"],
         #                                   progress_bar=progress_bar, game_number=game_number, requests=slide_requests, key_array=team_key_array, iterations=2)

@@ -29,9 +29,10 @@ def path_finder():
             # nba_build.intialize(nba_data.master_dict, nba_data.unique_games)
             # nba_build_team_analysis.create_team_request(nba_data.master_dict, nba_data.unique_games)
             # print("COMPLETE")
-            # # quit()
+            # quit()
             nba_build.create_request(
                 nba_data.master_dict, nba_data.unique_games)
+            
             # nba_build_team_analysis.create_team_request(nba_data.master_dict, nba_data.unique_games)
             nba_post.twitter_post(nba_build.all_image_paths,
                                   nba_data.master_dict, nba_data.unique_games)
