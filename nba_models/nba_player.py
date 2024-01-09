@@ -14,12 +14,12 @@ class NBA_Player:
             self.pts), str(self.reb), str(self.ast), str(self.blk + self.stl), str(self.plus_minus), 
             str(self.fgm) + "/" + str(self.fga), str(self.ftm) + "/" + str(self.fta), 
             str(round(self.average_shooting_percentage * 100, 1)) + "%", 
-            self.letter_grade, str(self.min), str(self.stl), str(self.blk), str(self.fg_pct) + "%", 
-            str(round(self.fg_3_m, 1)) + "/" + str(self.fg_3_a), str(self.tov), str(self.personal_fouls), 
+            self.letter_grade, str(self.min), str(self.stl), str(self.blk), str(round(self.fg_pct * 100, 1)) + "%", 
+            str(self.fg_3_m) + "/" + str(self.fg_3_a), str(self.tov), str(self.personal_fouls), 
             str(self.oreb), str(self.dreb)]
 
     def calculate_rating(self):
-        self.min = self.data['minutes']
+        self.min = self.data['minutes'].split(':')[0].strip()
         self.fgm = self.data['fieldGoalsMade']
         self.fga = self.data['fieldGoalsAttempted']
         self.fg_pct = self.data['fieldGoalsPercentage']

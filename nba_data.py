@@ -94,14 +94,6 @@ def get_games():
                         
                         del everything
                         break
-                    #     away_team.append(everything[count]['teamId'])
-                    #     away_team.append(everything[count]['teamTricode'])
-                    # elif everything[count]['scoreHome'] > everything[count - 1]['scoreHome'] and not home_team_id:
-                    #     home_team.append(everything[count]['teamId'])
-                    #     home_team.append(everything[count]['teamTricode'])
-                    # else:
-                    #     del everything
-                    #     break
                 count += 1
 
 

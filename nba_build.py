@@ -59,7 +59,7 @@ dir(slides_service)
 drive_service = build('drive', 'v3', credentials=creds)
 dir(drive_service)
 
-total_tasks = 147
+total_tasks = 215
 GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
