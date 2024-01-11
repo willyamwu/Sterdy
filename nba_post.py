@@ -19,6 +19,13 @@ def twitter_post(all_image_paths, master_dict, unique_games):
     for key, value in all_image_paths.items():
         progress_bar.set_description(f"Posting Game {count}")
 
+
+        # media_ids = []
+
+        # res = CONSTANTS.api.media_upload(value[0])
+        # media_ids.append(res)
+
+
         media_ids = []
         for image_path in value:
             res = CONSTANTS.api.media_upload(image_path)
