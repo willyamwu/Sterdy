@@ -15,11 +15,11 @@ from nba_api.stats.endpoints import PlayByPlayV3
 from nba_build import copy_slide, delete_slide, edit_text_request, get_images, get_special_keys
 import nba_build
 
-total_tasks = 147
+total_tasks = 215
 GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
-PRESENTATION_ID = '1ZF738FmLMrL22Ig-0c1UqrELf69X60de21fJZV9fpjw'
+PRESENTATION_ID = '1SuQDwgHivYQXmW8ksOfwg1KGv5OvP1T2Bx94cfGUwOc'
 
 team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
                   '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
