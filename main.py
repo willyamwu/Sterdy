@@ -4,8 +4,8 @@ import nba_post
 import CONSTANTS
 from nba_build_functions import nba_build_team_analysis
 
-start_up_prompt = '''(1) Daily Game Analysis
-(2) Player Rankings 
+start_up_prompt = '''(1) Daily Game Player Analysis
+(2) Daily Game Team Analysis 
 (3) Team Rankings'''
 
 
@@ -35,12 +35,19 @@ def path_finder():
             
             # nba_build_team_analysis.create_team_request(nba_data.master_dict, nba_data.unique_games)
             nba_post.twitter_post(nba_build.all_image_paths,
-                                  nba_data.master_dict, nba_data.unique_games)
+                                  nba_data.master_dict, nba_data.unique_games, 'TWITTER_MATCHUP')
             # nba_build.remove_all_photos(nba_build.all_image_paths)
             print("OPERATION COMPLETE")
             break
         elif user_input == "2":
-            print("Player Rankings -- SELECTED")
+            print("Daily Game Team Analysis -- SELECTED")
+            # Activate nba scripts
+            nba_data.get_games()
+            nba_build_team_analysis.create_team_request(nba_data.master_dict, nba_data.unique_games)
+            nba_post.twitter_post(nba_build.all_image_paths,
+                                  nba_data.master_dict, nba_data.unique_games, 'TWITTER_GAME_MATCHUP')
+            # nba_build.remove_all_photos(nba_build.all_image_paths)
+            print("OPERATION COMPLETE")
             break
         elif user_input == "3":
             print("Team Rankings -- SELECTED")

@@ -5,14 +5,14 @@ from tqdm import tqdm
 GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
-def twitter_post(all_image_paths, master_dict, unique_games):
+def twitter_post(all_image_paths, master_dict, unique_games, caption):
     progress_bar = tqdm(total=len(unique_games) + 1, bar_format=f"{{l_bar}}{GREEN}{{bar}}{RESET_COLOR}{{r_bar}}", desc="Posting to X", unit="task")
 
     progress_bar.set_description("Getting Matchups")
     twitter_matchups = []
     count = 0
     for game in unique_games:
-        twitter_matchups.append(master_dict[game]['TWITTER_MATCHUP'])
+        twitter_matchups.append(master_dict[game][caption])
 
     progress_bar.update(1)
 

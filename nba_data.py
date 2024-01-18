@@ -185,6 +185,8 @@ def build_text(game_id):
             tweet_text = tweet_text + key + ": " + value + "\n"
             instagram_caption = instagram_caption + key + ": " + value + "\n"
 
+    master_dict[game_id]['TWITTER_GAME_MATCHUP'] = tweet_text
+
     tweet_text += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
     instagram_caption += master_dict[game_id]['PLAYERS'][0].player_of_the_match()
 
