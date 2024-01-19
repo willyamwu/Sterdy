@@ -1,25 +1,18 @@
-# import json
-# from logging import Logger
-# from pty import master_open
 import re
 import CONSTANTS
-# from PIL import Image
-# from io import BytesIO
-# import time
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-# from nba_api.stats.endpoints import PlayByPlayV3
 
 from nba_build import copy_slide, delete_slide, edit_text_request, get_images, get_special_keys
 import nba_build
 
-total_tasks = 215
+total_tasks = 26
 GREEN = "\033[92m"
 RESET_COLOR = "\033[0m"
 
-PRESENTATION_ID = '1SuQDwgHivYQXmW8ksOfwg1KGv5OvP1T2Bx94cfGUwOc'
+PRESENTATION_ID = '1ZF738FmLMrL22Ig-0c1UqrELf69X60de21fJZV9fpjw'
 
 team_key_array = ['{TEAM', '{W-L', '{TP', '{TRT',
                   '{TFG', '{TA', '{TRB', '{TBL', '{TST', '{TTV', '{TSH']
